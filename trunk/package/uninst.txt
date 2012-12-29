@@ -1,0 +1,17 @@
+Uninstalling:
+
+★ Are you Sure
+★ Close your Fiddler First
+
+
+
+
+
+卸载SmartHost:
+
+★ 即将卸载SmartHost
+★ 卸载完成后,请重启Fiddler
+
+
+
+Any Suggestion : mooringniu AT gmail.com
