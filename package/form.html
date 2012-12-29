@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SmartHost</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<meta charset="gb2312" />
+<meta http-equiv="content-type" content="text/html; charset=gb2312" />
+<meta author="mooringniu" />
+<style type="text/css" media="screen">
+body{margin:0px;padding:0px;font-size:1.2em;line-height:1em;font-weight:500;max-width:device-width;min-width:320px;}
+form{text-align: left;margin:0px; padding:0px; }
+form input,form select { width:100%; line-height:1.2em;font-size:1.2em;}
+</style>
+</head>
+<body>
+<form method="POST" action="/" onsubmit="return saveData()">
+<fieldset>
+    <legend>SmartHost配置</legend>
+	smart.host<select name="smart.host">
+		<option value="">现网Host</option>
+		<option value="127.0.0.1" selected>127.0.0.1</option>
+	</select>
+	localhost<select name="localhost">
+		<option value="">现网Host</option>
+		<option value="127.0.0.1" selected>127.0.0.1</option>
+	</select>
+	<span holder></span>
+	<input type="submit" value="Submit">
+</fieldset>
+</form>
+<script type="text/javascript">
+function saveData(){
+	ipts = document.getElementsByTagName("select");
+	for(var i=0,il=ipts.length; i<il; i++){
+		if(/[\w\d]+\.[\w\d]+/.test(ipts[i].name)){
+			cks[ipts[i].name] = ipts[i].value;
+		}
+	}
+	saveCookies();
+	return true;
+}
+function setData(){
+	for(var i in ipts){
+		if( ipts[i].name in cks){
+			ipts[i].value = cks[ipts[i].name];
+        }
+	}
+}
+function splitQueryString(str){
+	var strArr = str.split(/&+/gi),obj = {};
+	for(var i=0,il=strArr.length; i<il; i++){
+		var sp = strArr[i].split(/=+/gi);
+		if(sp.length==2){
+			obj[sp[0]] = sp[1];
+		}
+	}
+	return obj;
+}
+function splitCookies(str){
+	var cookies = str.split(/;\s*/gi),ckObj = {};
+	for(var i =0,il=cookies.length; i<il; i++){
+		var obj = splitQueryString(cookies[i]);
+		for(var j in obj){
+			if(/[\w\d]+\.[\w\d]+/.test(j)){
+				ckObj[j] = obj[j];
+			}
+		}
+	}
+	return ckObj;
+}
+function saveCookies()
+{
+	var dt = new Date(),dtStr = '',etStr = '', cookieStr = '';
+	dt.setTime(dt.getTime()+3600*24*7*1000);
+	dtStr = dt.toGMTString();
+    dt.setTime(dt.getTime()-3600*24*8*1000);
+	etStr = dt.toGMTString();
+    alert(dtStr+ " " + etStr);
+	for(var i in cks){
+        var estr = (cks[i] == "")?etStr:dtStr;
+		document.cookie = i + "=" + cks[i] + "; expires="+estr+"; path=/;";
+	}
+}
+(function(){
+	ipts = document.getElementsByTagName("select");
+	var ck = document.cookie;
+	cks = splitCookies(ck);
+	setData();
+})();
+</script>
+</body>
+</html>
