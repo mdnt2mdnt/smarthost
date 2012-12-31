@@ -6,7 +6,7 @@
 ★ Uninstaller located at"%UserProfile%\My Documents\Fiddler2\Scripts\Smarthost\Uninstall.exe"
 ★ Visit http://smart.host/ from your client
 
-
+visit http://code.google.com/p/smarthost/downloads/list for update
 
 VERSION HISTORY:
 1.0.0.0
