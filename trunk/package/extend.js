@@ -15,7 +15,7 @@ $.fn.applyRule = function(){
 		var checked = this.checked;
 		checked && me.not(this).attr('checked', false).parent('label').removeClass('effective');
 		$(this).parent('label')[checked ? 'addClass' : 'removeClass']('effective');
-		saveDomToHost((checked ? '启' : '禁') + '用host规则');
+		saveDomToHost((checked ? 'Enable ' : 'Disable ') + 'Host');
 	});
 }
 $.fn.modal = function(fnOK, fnCancel){
@@ -44,18 +44,14 @@ $.fn.modal = function(fnOK, fnCancel){
 	}
 	return divDialog;
 }
-//扩展String的原型
 $.extend(String.prototype, {
-	//默认为去两端空格，如果传入正则，则把字符串中与正则相匹配的内容替换为空，即删除
 	_rTrim : /(^\s+)|(\s+$)/g,
 	trim: function(r){
 		return this.replace(r || String.prototype._rTrim, "");
 	},
-	//判断一个字符串是否为空或者全是空格
 	empty: function(){
 		return this.trim() == '';
 	},
-	//判断字符串长度，如果字符串中含有全角字符，则把全角字符作为两个半角字符计算
 	lenW: function(){
 		return this.replace(/[^\x00-\xff]/g, "**").length;
 	},
@@ -76,7 +72,7 @@ $.extend(String.prototype, {
 			ts.close();
 			return true;
 		} catch (e) {
-			msg("保存文件\n" + this + "\n失败!请检查文件是否为只读属性");
+			msg("Save\n" + this + "\nFailed");
 			return false;
 		}
 	}
