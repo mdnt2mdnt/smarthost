@@ -14,13 +14,13 @@
 
 *Usage*
  # Fiddler 2.4.1.1 is required
- # Click Smarthost.exe to install
  # Close Fiddler first
+ # Click Smarthost.exe to install
  # Smarthost Menuitem will be placed At the main menubar of Fiddler
- # check Enabled to make this extension work
- # config the hosts you want to remap from Smarthost->Config Host
- # set default proxy to fiddler then visit http://smart.host or http://config.qq.com
- # click submit button to make it work
+ # Check Enabled to make this extension work
+ # Config the hosts you want to remap from Smarthost->Config Host
+ # Set default proxy to fiddler then visit http://smart.host or http://config.qq.com
+ # Click submit button to make it work
 
 
 
@@ -30,5 +30,5 @@
  # NSIS Unicode is required [http://code.google.com/p/unsis/downloads/list]
  # Change Path Value in make.cmd file
  # Let csc.exe and makensis.exe in your PATH ENV(.ie include Path_to_Microsoft.NET\Framework\Version_Number  and Path_to_NSIS in your path)
- # run Make.cmd in src folder
+ # Run Make.cmd in src folder
  # Smarthost.dll and Smarthost.exe will be placed at obj folder if no error occurred 
