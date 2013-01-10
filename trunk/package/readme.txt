@@ -25,6 +25,8 @@ VERSION HISTORY:
 1.0.2.3
 2012/12/29  Remove Monitoring function
 
+1.0.2.4
+2013/01/10  Fix http GET 502 error after post Config 
 
 ★ 请确认您已经安装了Fiddler (**重要**)
 ★ 安装前请关闭Fiddler (**重要**)
