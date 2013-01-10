@@ -3,15 +3,15 @@
 *VERSION HISTORY*
 
   * 1.0.0.0
-    #CustomRules.js Version Released for internal use  
+    # CustomRules.js Version Released for internal use  
   * 1.0.1.0
-    #Smarthost.dll first Version Released
+    # Smarthost.dll first Version Released
   * 1.0.2.1
-    #Stable Version for hostEditor.hta and Smarthost
+    # Stable Version for hostEditor.hta and Smarthost
   * 1.0.2.2
-    #Add System Proxy Change Monitor
-    #Add Remember Enabled SmartHost
+    # Add System Proxy Change Monitor
+    # Add Remember Enabled SmartHost
   * 1.0.2.3
     #Remove Monitoring function
   * 1.0.2.4
-    #Fix http GET 502 error after post Config
+    # Fix http GET 502 error after post Config
