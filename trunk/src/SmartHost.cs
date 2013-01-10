@@ -25,7 +25,7 @@ public class SmartHost : IAutoTamper {
     private bool   _tamperHost     = false;
     private string _scriptPath     = String.Empty;
     private int    _oldProxyEnabled;
-    private Dictionary<string,Dictionary<string,string>> usrConfig;
+    private Dictionary<string,string> usrConfig;
     private MenuItem mnuSmartHost;
     private MenuItem mnuSmartHostEnabled;
     private MenuItem mnuSmartHostConfig;
@@ -36,7 +36,7 @@ public class SmartHost : IAutoTamper {
         getPrefs();
         initializeMenu();
         setPluginPath();
-        this.usrConfig= new Dictionary<string,Dictionary<string,string>>();
+        this.usrConfig= new Dictionary<string,string>();
     }
     private void getPrefs(){
         this._tamperHost = FiddlerApplication.Prefs.GetBoolPref("extensions.smarthost.enabled",false);
@@ -117,7 +117,7 @@ public class SmartHost : IAutoTamper {
     }
     
     [CodeDescription("parse client post message")]
-    private void parsePost(string postStr, Dictionary<string,string> config ){
+    private void parseAndSaveConfig(string postStr,string cIP){
         postStr = Regex.Replace(postStr,"\\s+","");
         string[] pairs = Regex.Split(postStr,"&+");
         string[] hostIP = new string[2];
@@ -127,14 +127,10 @@ public class SmartHost : IAutoTamper {
             if(hostIP[0].Length==0){
                 continue;
             }
-            if(hostIP[1].Length==0 && config.ContainsKey(hostIP[0])){
-                config.Remove(hostIP[0]);
-                continue;
-            }
-            if(config.ContainsKey(hostIP[0])){
-                config[hostIP[0]] = hostIP[1];
+            if(hostIP[1].Length==0 && this.usrConfig.ContainsKey(cIP+"|"+hostIP[0])){
+                this.usrConfig.Remove(cIP+"|"+hostIP[0]);
             }else{
-                config.Add(hostIP[0],hostIP[1]);
+                this.usrConfig[cIP+"|"+hostIP[0]] = hostIP[1];
             }
         }
     }
@@ -142,30 +138,20 @@ public class SmartHost : IAutoTamper {
     [CodeDescription("save client configuration to userConfig")]
     private void saveConfig(string cIP, Session oSession){
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
-        Dictionary<string,string> config;
-        if( !usrConfig.ContainsKey(cIP) ){
-            config = new Dictionary<string,string>();
-            parsePost(postStr,config);;
-            usrConfig.Add(cIP,config);
-        }else{
-            config = (Dictionary<string,string>) usrConfig[cIP];
-            parsePost(postStr,config);
-            usrConfig[cIP] = config;
-        }
+        parseAndSaveConfig(postStr,cIP);
         oSession["x-replywithfile"] = "done.html";
     }
     
     [CodeDescription("Deal With Request if client IP Configed")]
     private void upRequestHost(string cIP,Session oSession){
         string hostname = oSession.hostname;
-        Dictionary<string,string> curConfig = (Dictionary<string,string>) usrConfig[cIP];
-        if( curConfig.ContainsKey(hostname) ){
-            if( curConfig[hostname] == "" || curConfig[hostname] == null ){
+        if( this.usrConfig.ContainsKey(cIP+"|"+hostname) ){
+            if( this.usrConfig[cIP+"|"+hostname] == "" || this.usrConfig[cIP+"|"+hostname] == null ){
                 oSession.bypassGateway = false;
                 oSession["x-overrideHost"] = null;
             }else{
                 oSession.bypassGateway = true;
-                oSession["x-overrideHost"] = curConfig[hostname];
+                oSession["x-overrideHost"] = this.usrConfig[cIP+"|"+hostname];
             }
         }
     }
@@ -174,7 +160,8 @@ public class SmartHost : IAutoTamper {
     public void AutoTamperRequestBefore(Session oSession){
         if(!this._tamperHost){ return;}
         string cIP = (oSession.m_clientIP != null && oSession.m_clientIP.Length>0) ? oSession.m_clientIP : oSession.clientIP;
-        if( this.usrConfig.ContainsKey(cIP) ){
+        string hostname = oSession.hostname;
+        if( this.usrConfig.ContainsKey(cIP+"|"+hostname) ){
             //if request clients configed the host/ip list
             upRequestHost(cIP,oSession);
         }else if(oSession.HostnameIs("smart.host")||oSession.HostnameIs("config.qq.com")){
@@ -184,8 +171,7 @@ public class SmartHost : IAutoTamper {
                 }else{
                     oSession["x-replywithfile"] = "form.html";
                 }
-            }
-            if(oSession.HTTPMethodIs("POST")) {
+            }else if(oSession.HTTPMethodIs("POST")) {
                saveConfig(cIP,oSession);
             }
         } 
