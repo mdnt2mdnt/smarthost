@@ -75,7 +75,6 @@ function saveCookies()
 	dtStr = dt.toGMTString();
     dt.setTime(dt.getTime()-3600*24*8*1000);
 	etStr = dt.toGMTString();
-    alert(dtStr+ " " + etStr);
 	for(var i in cks){
         var estr = (cks[i] == "")?etStr:dtStr;
 		document.cookie = i + "=" + cks[i] + "; expires="+estr+"; path=/;";
