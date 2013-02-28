@@ -25,8 +25,7 @@
 
 
 *Compile Note*
- # .Net framework 2.0 is required
- # Visual C# 2005 or later is required
+ # .Net framework 2.0 SDK is required [http://www.microsoft.com/en-us/download/details.aspx?id=19988]
  # NSIS Unicode is required [http://code.google.com/p/unsis/downloads/list]
  # Change Path Value in make.cmd file
  # Let csc.exe and makensis.exe in your PATH ENV(.ie include Path_to_Microsoft.NET\Framework\Version_Number  and Path_to_NSIS in your path)
