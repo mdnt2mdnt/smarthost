@@ -29,13 +29,13 @@ UninstallText         "Are you Sure" "Smarthost path:"
 UninstPage            uninstConfirm
 UninstPage            instfiles
 
-VIProductVersion                      1.0.2.3
+VIProductVersion                      1.0.2.4
 VIAddVersionKey ProductName           "SmartHost"
 VIAddVersionKey Comments              "All Right Reserved By Mooring"
 VIAddVersionKey CompanyName           "Tencent .Ltd"
 VIAddVersionKey FileDescription       "A Simple Host Mapping Tool for Fiddler"
-VIAddVersionKey FileVersion           1.0.2.3
-VIAddVersionKey ProductVersion        1.0.2.3
+VIAddVersionKey FileVersion           1.0.2.4
+VIAddVersionKey ProductVersion        1.0.2.4
 VIAddVersionKey LegalCopyright        "Copyright Mooringniu@Tencent 2012"
 VIAddVersionKey InternalName          "SmartHost.exe"
 VIAddVersionKey OriginalFilename      "SmartHost.exe"
@@ -81,10 +81,10 @@ Section SmartHost
 SectionEnd
 
 
-Section DesktopShortCut
-    CreateShortCut  "$DESKTOP\Config.lnk" "$OUTDIR\Scripts\Smarthost\hostEditor.hta" "" \
-                    "$OUTDIR\Scripts\Smarthost\smarthost.ico"
-SectionEnd
+;Section DesktopShortCut
+;    CreateShortCut  "$DESKTOP\Config.lnk" "$OUTDIR\Scripts\Smarthost\hostEditor.hta" "" \
+;                    "$OUTDIR\Scripts\Smarthost\smarthost.ico"
+;SectionEnd
 
 Section Uninstall
     SetOutPath    "$DOCUMENTS\Fiddler2\"
