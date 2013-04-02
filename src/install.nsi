@@ -64,12 +64,12 @@ Section SmartHost
     File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"      ..\package\readme.txt
     File             "/oname=$OUTDIR\Captures\Responses\form.html"      ..\package\form.html
     File             "/oname=$OUTDIR\Captures\Responses\done.html"      ..\package\done.html
+    File             "/oname=$OUTDIR\Captures\Responses\blank.gif"      ..\package\blank.gif
     File             "/oname=$OUTDIR\Captures\Responses\favicon.ico"    ..\package\favicon.ico
     File             "/oname=$OUTDIR\Scripts\Smarthost\smarthost.ico"   ..\package\favicon.ico
     File             "/oname=$OUTDIR\Scripts\Smarthost\hostEditor.hta"  ..\package\hostEdit.hta
     File             "/oname=$OUTDIR\Scripts\Smarthost\extend.js"       ..\package\extend.js
     File             "/oname=$OUTDIR\Scripts\Smarthost\jquery.js"       ..\package\jquery.js
-    File             "/oname=$OUTDIR\Scripts\Smarthost\blank.gif"       ..\package\blank.gif
     File             "/oname=$OUTDIR\Scripts\Smarthost\style.css"       ..\package\style.css
     WriteUninstaller "$OUTDIR\Scripts\Smarthost\Uninstall.exe"
     WriteRegStr HKCU "Software\SmartHost" "HostPath" "$OUTDIR"
