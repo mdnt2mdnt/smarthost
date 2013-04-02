@@ -11,7 +11,7 @@ visit http://code.google.com/p/smarthost/downloads/list for update
 VERSION HISTORY:
 1.0.2.5
 2013/04/02  And print js Log to Fiddler Log Tabs
-            Sending log string to http://smarthost/log/?your_log_string as image request
+            Sending log string to http://smart.host/log/?your_log_string as image request
             
 1.0.2.4
 2013/01/10  Fix http GET 502 error after post Config 
