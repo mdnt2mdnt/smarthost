@@ -69,6 +69,7 @@ Section SmartHost
     File             "/oname=$OUTDIR\Scripts\Smarthost\hostEditor.hta"  ..\package\hostEdit.hta
     File             "/oname=$OUTDIR\Scripts\Smarthost\extend.js"       ..\package\extend.js
     File             "/oname=$OUTDIR\Scripts\Smarthost\jquery.js"       ..\package\jquery.js
+    File             "/oname=$OUTDIR\Scripts\Smarthost\blank.gif"       ..\package\blank.gif
     File             "/oname=$OUTDIR\Scripts\Smarthost\style.css"       ..\package\style.css
     WriteUninstaller "$OUTDIR\Scripts\Smarthost\Uninstall.exe"
     WriteRegStr HKCU "Software\SmartHost" "HostPath" "$OUTDIR"
