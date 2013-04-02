@@ -16,8 +16,8 @@ using Fiddler;
 [assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2012")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
-[assembly: AssemblyVersion("1.0.2.3")]
-[assembly: AssemblyFileVersion("1.0.2.3")]
+[assembly: AssemblyVersion("1.0.2.5")]
+[assembly: AssemblyFileVersion("1.0.2.5")]
 [assembly: Fiddler.RequiredVersion("2.4.1.1")]
 
 
@@ -141,7 +141,10 @@ public class SmartHost : IAutoTamper {
         parseAndSaveConfig(postStr,cIP);
         oSession["x-replywithfile"] = "done.html";
     }
-    
+    [CodeDescription("print jslog to fiddler for mobile debuging")]
+    private void printJSLog(string log){
+        FiddlerApplication.Log.LogString(log);
+    }
     [CodeDescription("Deal With Request if client IP Configed")]
     private void upRequestHost(string cIP,Session oSession){
         string hostname = oSession.hostname;
@@ -168,13 +171,16 @@ public class SmartHost : IAutoTamper {
             if(oSession.HTTPMethodIs("GET")) {
                 if(oSession.url.Contains(".ico")){
                     oSession["x-replywithfile"] = "favicon.ico";
-                }else{
+                }else if(oSession.uriContains("/log/")){
+                	this.printJSLog(oSession.url.ToString());
+                	oSession["x-replywithfile"] = "blank.gif";
+            	}else{
                     oSession["x-replywithfile"] = "form.html";
                 }
             }else if(oSession.HTTPMethodIs("POST")) {
                saveConfig(cIP,oSession);
             }
-        } 
+        }
     }
     
     public void AutoTamperRequestAfter(Session oSession){ }

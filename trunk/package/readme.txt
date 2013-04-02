@@ -9,24 +9,29 @@
 visit http://code.google.com/p/smarthost/downloads/list for update
 
 VERSION HISTORY:
-1.0.0.0
-2012/11/09  CustomRules.js Version Released for internal use
+1.0.2.5
+2013/04/02  And print js Log to Fiddler Log Tabs
+            Sending log string to http://smarthost/log/?your_log_string as image request
+            
+1.0.2.4
+2013/01/10  Fix http GET 502 error after post Config 
 
-1.0.1.0
-2012/12/03  Smarthost.dll first Version Released
-
-1.0.2.1
-2012/12/13  Stable Version for hostEditor.hta and Smarthost
+1.0.2.3
+2012/12/29  Remove Monitoring function
 
 1.0.2.2
 2012/12/14  Add System Proxy Change Monitor
 2012/12/26  Add Remember Enabled SmartHost
 
-1.0.2.3
-2012/12/29  Remove Monitoring function
+1.0.2.1
+2012/12/13  Stable Version for hostEditor.hta and Smarthost
 
-1.0.2.4
-2013/01/10  Fix http GET 502 error after post Config 
+1.0.1.0
+2012/12/03  Smarthost.dll first Version Released
+
+1.0.0.0
+2012/11/09  CustomRules.js Version Released for internal use
+
 
 ★ 请确认您已经安装了Fiddler (**重要**)
 ★ 安装前请关闭Fiddler (**重要**)
