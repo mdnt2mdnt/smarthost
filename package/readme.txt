@@ -9,6 +9,9 @@
 visit http://code.google.com/p/smarthost/downloads/list for update
 
 VERSION HISTORY:
+1.0.2.6
+2013/04/06  change compole sdk from  .Net v3.5 to v2.0 for smarthost Menu 
+	    not show under Fiddler 4.0 Beta Version
 1.0.2.5
 2013/04/02  And print js Log to Fiddler Log Tabs
             Sending log string to http://smart.host/log/?your_log_string as image request
