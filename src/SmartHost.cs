@@ -16,8 +16,8 @@ using Fiddler;
 [assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2012")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
-[assembly: AssemblyVersion("1.0.2.5")]
-[assembly: AssemblyFileVersion("1.0.2.5")]
+[assembly: AssemblyVersion("1.0.2.7")]
+[assembly: AssemblyFileVersion("1.0.2.7")]
 [assembly: Fiddler.RequiredVersion("2.4.1.1")]
 
 
@@ -185,8 +185,14 @@ public class SmartHost : IAutoTamper {
     
     public void AutoTamperRequestAfter(Session oSession){ }
     public void AutoTamperResponseBefore(Session oSession){ }
-    public void AutoTamperResponseAfter(Session oSession){ }
+    public void AutoTamperResponseAfter(Session oSession){ 
+        this.updateTimeColumn(oSession);
+    }
     
+    private void updateTimeColumn(Session oSession){
+        Int32 count = oSession.Timers.ServerDoneResponse.Millisecond - oSession.Timers.ClientDoneRequest.Millisecond;
+        oSession["ui-customcolumn"] += count.ToString() + "ms";
+    }
     public void OnLoad(){
         FiddlerApplication.UI.mnuMain.MenuItems.Add(mnuSmartHost);
         FiddlerApplication.UI.lvSessions.AddBoundColumn("Client IP", 110, "x-clientIP");

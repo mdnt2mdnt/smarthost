@@ -9,6 +9,9 @@
 visit http://code.google.com/p/smarthost/downloads/list for update
 
 VERSION HISTORY:
+1.0.2.7
+2013/06/17  Add Request Time to Custom Column for Fiddler 2.4.4.5
+
 1.0.2.6
 2013/04/06  change compole sdk from  .Net v3.5 to v2.0 for smarthost Menu 
 	    not show under Fiddler 4.0 Beta Version
