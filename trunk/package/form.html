@@ -26,7 +26,7 @@ form .input{ width: 90% !important; }
     <span holder></span>
     Custom:
     <div class="info">
-        <input class="input" type="text" key="key" placeholder="域名">
+        <input class="input" type="text" key="key" placeholder="域名" value="">
         <input class="input" type="text" key="val" maxlength="15" placeholder="IP/留空为现网" />
         <hr border="0" color="#eeeeee"/>
     </div>
@@ -50,7 +50,7 @@ function saveData(){
         }
     }
     for(var j=0,jl=divs.length;j<jl;j++){
-        var child = divs[j].childNodes, 
+        var child = divs[j].childNodes, item = '',
             kv = {}, k = '', key = '', val = '';
         for(var i=0,il=child.length;i<il;i++){
             kv = child[i];
@@ -58,6 +58,8 @@ function saveData(){
                k = kv.getAttribute('key'); 
                if(k=='key' && /^([\w\d]+\.)+\w+$/.test(kv.value)){
                    key = kv.value;
+                   kv.setAttribute("name",key);
+                   item = kv;
                    continue;
                }
                if(k=='val'){ 
@@ -73,8 +75,12 @@ function saveData(){
         if(key!=''){ 
             cks[key] = val; 
             ldata.push(key+'='+val);
+            if(item){ 
+                item.value = val; 
+                item.setAttribute("value",val);
+            }
         }
-        key = ''; val = '';
+        key = ''; val = '';item='';
     }
     if('localStorage' in window){
         localStorage.setItem('ldata',ldata.join('; '));
@@ -104,9 +110,9 @@ function setData(){
             s.name = i;
             s.options[0] = new Option('现网Host',''); 
             s.options[1] = new Option(cks[i],cks[i]);
-            s.opitons[1].selected = true;
             frag.appendChild(t);
             frag.appendChild(s);
+            if(s.options[1]){s.options[1].selected = true;}
         }
     }
     span.parentNode.insertBefore(frag,span);
