@@ -4,14 +4,82 @@
 <meta charset="gb2312" />
 <meta http-equiv="content-type" content="text/html; charset=gb2312"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
-<meta author="mooringniu" />
+<meta name="author" content="mooringniu" />
+<meta name="url" content="http://code.google.com/p/smarthost" />
+<meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
 <style type="text/css">
 body{margin:0px;padding:0px;line-height:2em;font-size:1.2em;font-weight:600;max-width:device-width;min-width:320px;text-align:center;}
 </style>
 </head>
 <body>
 <h1>Done</h1>
-	<a href="http://localhost/" target="_blank">localhost</a><br/>
-	<span holder></span>
+<a href="http://localhost/" target="_blank">localhost</a><br/>
+<span holder></span>
+<script type="text/javascript">
+function setData(){
+    var frag = document.createDocumentFragment(),
+        span = document.getElementsByTagName('span')[0],
+        a = document.getElementsByTagName('a'),
+        ldata = '',
+        sNames = {};
+    for(var i=0,il=a.length;i<il;i++){
+        if(a[i].href){
+            sNames[a[i].href] = true;
+        }
+    }
+    //???涔?????缃??HOST???琛?
+    for(var i in cks){
+        var url = 'http://'+i+'/';
+        if(url in sNames){ continue; }
+        var s = document.createElement('a');
+        s.target="_blank";
+        s.href = url;
+        frag.appendChild(s);
+    }
+    //???涔????娇?ㄧ?缃?????host
+    if('localStorage' in window){
+        ldata = localStorage.getItem('ldata');
+        if(ldata!=null){
+            ldata = splitCookies(ldata);
+            for(var j in ldata){
+                if(j in cks){ continue; }
+                var s = document.createElement('a');
+                s.href = 'http://'+j+'/';
+                s.target="_blank";
+                s.innerHTML = j;
+                frag.appendChild(s);
+            }
+        }
+    }
+    span.parentNode.insertBefore(frag,span);
+}
+function splitQueryString(str){
+    var strArr = str.split(/&+/gi),obj = {};
+    for(var i=0,il=strArr.length; i<il; i++){
+        var sp = strArr[i].split(/=+/gi);
+        if(sp.length==2){
+            obj[sp[0]] = sp[1];
+        }
+    }
+    return obj;
+}
+function splitCookies(str) {
+    var cookies = str.split(/;\s*/gi),ckObj = {};
+    for(var i =0,il=cookies.length; i<il; i++){
+        var obj = splitQueryString(cookies[i]);
+        for(var j in obj){
+            if(/[\w\d]+\.[\w\d]+/.test(j)){
+                ckObj[j] = obj[j];
+            }
+        }
+    }
+    return ckObj;
+}
+(function(){
+    var ck = document.cookie;
+    cks = splitCookies(ck);
+    setData();
+})();
+</script>
 </body>
 </html>
