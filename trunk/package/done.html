@@ -27,7 +27,6 @@ function setData(){
             sNames[a[i].href] = true;
         }
     }
-    //???ä¹?????ç½??HOST???è¡?
     for(var i in cks){
         var url = 'http://'+i+'/';
         if(url in sNames){ continue; }
@@ -36,7 +35,6 @@ function setData(){
         s.href = url;
         frag.appendChild(s);
     }
-    //???ä¹????½¿?¨ç?ç½?????host
     if('localStorage' in window){
         ldata = localStorage.getItem('ldata');
         if(ldata!=null){
