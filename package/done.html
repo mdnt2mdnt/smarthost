@@ -15,7 +15,11 @@ body{margin:0px;padding:0px;line-height:2em;font-size:1.2em;font-weight:600;max-
 <h1>Done</h1>
 <a href="http://localhost/" target="_blank">localhost</a><br/>
 <span holder></span>
+<button onclick="goBack();return false;" href="javascript:void(0);">GO BACK</button>
 <script type="text/javascript">
+function goBack(){
+    location.href = location.href;
+}
 function setData(){
     var frag = document.createDocumentFragment(),
         span = document.getElementsByTagName('span')[0],
