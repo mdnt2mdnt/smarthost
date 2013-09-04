@@ -43,10 +43,13 @@ function addHost(obj){
 function saveData(){
     ipts = document.getElementsByTagName("select");
     divs = document.getElementsByTagName('div');
-    var ldata = [];
+    var localData = [];
     for(var i=0,il=ipts.length; i<il; i++){
         if(/[\w\d]+\.[\w\d]+/.test(ipts[i].name)){
             cks[ipts[i].name] = ipts[i].value;
+        }
+        if(ipts[i].isLocal){
+            localData.push(ipts[i].name+'='+ipts[i].value);
         }
     }
     for(var j=0,jl=divs.length;j<jl;j++){
@@ -74,7 +77,7 @@ function saveData(){
         }
         if(key!=''){ 
             cks[key] = val; 
-            ldata.push(key+'='+val);
+            localData.push(key+'='+val);
             if(item){ 
                 item.value = val; 
                 item.setAttribute("value",val);
@@ -83,7 +86,7 @@ function saveData(){
         key = ''; val = '';item='';
     }
     if('localStorage' in window){
-        localStorage.setItem('ldata',ldata.join('; '));
+        localStorage.setItem('localData',localData.join('; '));
     }
     saveCookies();
     return true;
@@ -91,7 +94,7 @@ function saveData(){
 function setData(){
     var frag = document.createDocumentFragment(),
         span = document.getElementsByTagName('span')[0],
-        ldata = '',
+        localData = '',
         sNames = {};
     //正常数据
     for(var i=0,il=ipts.length;i<il;i++){
@@ -108,6 +111,7 @@ function setData(){
             var t = document.createTextNode(i),
                 s = document.createElement('select');
             s.name = i;
+            s.isLocal = true;
             s.options[0] = new Option('现网Host',''); 
             s.options[1] = new Option(cks[i],cks[i]);
             frag.appendChild(t);
@@ -118,12 +122,12 @@ function setData(){
     span.parentNode.insertBefore(frag,span);
     //自定义数据使用现网数据的host
     if('localStorage' in window){
-        ldata = localStorage.getItem('ldata');
-        if(ldata!=null){
-            ldata = splitCookies(ldata);
+        localData = localStorage.getItem('localData');
+        if(localData!=null){
+            localData = splitCookies(localData);
             frag = document.createDocumentFragment();
             var t = 0;
-            for(var j in ldata){
+            for(var j in localData){
                 if(j in cks){ continue; }
                 var div = odiv.cloneNode(true),
                     child = div.childNodes;
@@ -135,7 +139,7 @@ function setData(){
                             child[i].value = j;
                         }
                         if(attr == 'val'){
-                            child[i].value = ldata[j]; 
+                            child[i].value = localData[j]; 
                         }
                     }
                 }

@@ -20,7 +20,7 @@ function setData(){
     var frag = document.createDocumentFragment(),
         span = document.getElementsByTagName('span')[0],
         a = document.getElementsByTagName('a'),
-        ldata = '',
+        localData = '',
         sNames = {};
     for(var i=0,il=a.length;i<il;i++){
         if(a[i].href){
@@ -39,10 +39,10 @@ function setData(){
         frag.appendChild(b);
     }
     if('localStorage' in window){
-        ldata = localStorage.getItem('ldata');
-        if(ldata!=null){
-            ldata = splitCookies(ldata);
-            for(var j in ldata){
+        localData = localStorage.getItem('localData');
+        if(localData!=null){
+            localData = splitCookies(localData);
+            for(var j in localData){
                 if(j in cks){ continue; }
                 var s = document.createElement('a'),
                     b = document.createElement('br');
