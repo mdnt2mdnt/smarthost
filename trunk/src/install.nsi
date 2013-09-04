@@ -91,6 +91,7 @@ Section Uninstall
     SetOutPath    "$DOCUMENTS\Fiddler2\"
     Delete        "$Desktop\Config.lnk"
     Delete        "$OUTDIR\Scripts\Smarthost\README.txt"
+    Delete        "$OUTDIR\Captures\Responses\blank.gif"
     Delete        "$OUTDIR\Captures\Responses\form.html"
     Delete        "$OUTDIR\Captures\Responses\done.html"
     Delete        "$OUTDIR\Captures\Responses\favicon.ico"
