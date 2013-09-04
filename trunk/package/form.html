@@ -2,89 +2,184 @@
 <html>
 <head>
 <title>SmartHost</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
 <meta charset="gb2312" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="content-type" content="text/html; charset=gb2312" />
-<meta author="mooringniu" />
+<meta name="author" content="mooringniu" />
+<meta name="url" content="http://code.google.com/p/smarthost" />
+<meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
 <style type="text/css" media="screen">
-body{margin:0px;padding:0px;font-size:1.2em;line-height:1em;font-weight:500;max-width:device-width;min-width:320px;}
-form{text-align: left;margin:0px; padding:0px; }
-form input,form select { width:100%; line-height:1.2em;font-size:1.2em;}
+body{margin:0;padding:0;font-size:1.2em;line-height:1em;font-weight:500;max-width:device-width;min-width:320px;}
+form{text-align: left;margin:0; padding:0; }
+form input,form select,form button{ width:100%; line-height:1.2em;font-size:1.2em;}
+form .input{ width: 90% !important; }
 </style>
 </head>
 <body>
 <form method="POST" action="/" onsubmit="return saveData()">
 <fieldset>
     <legend>SmartHost配置</legend>
-	smart.host<select name="smart.host">
-		<option value="">现网Host</option>
-		<option value="127.0.0.1" selected>127.0.0.1</option>
-	</select>
-	localhost<select name="localhost">
-		<option value="">现网Host</option>
-		<option value="127.0.0.1" selected>127.0.0.1</option>
-	</select>
-	<span holder></span>
-	<input type="submit" value="Submit">
+    localhost<select name="localhost">
+        <option value="" selected>现网Host</option>
+        <option value="127.0.0.1">127.0.0.1</option>
+    </select>
+    <span holder></span>
+    Custom:
+    <div class="info">
+        <input class="input" type="text" key="key" placeholder="域名">
+        <input class="input" type="text" key="val" maxlength="15" placeholder="IP/留空为现网" />
+        <hr border="0" color="#eeeeee"/>
+    </div>
+    <input type="button" onclick="addHost(this);return false;" id="addBtnOne" value="Add More" />
+    <br/> <br/>
+    <input type="submit" value="Submit">
 </fieldset>
 </form>
 <script type="text/javascript">
+function addHost(obj){
+    var div = odiv.cloneNode(true);
+    obj.parentNode.insertBefore(div,obj);
+}
 function saveData(){
-	ipts = document.getElementsByTagName("select");
-	for(var i=0,il=ipts.length; i<il; i++){
-		if(/[\w\d]+\.[\w\d]+/.test(ipts[i].name)){
-			cks[ipts[i].name] = ipts[i].value;
-		}
-	}
-	saveCookies();
-	return true;
+    ipts = document.getElementsByTagName("select");
+    divs = document.getElementsByTagName('div');
+    var ldata = [];
+    for(var i=0,il=ipts.length; i<il; i++){
+        if(/[\w\d]+\.[\w\d]+/.test(ipts[i].name)){
+            cks[ipts[i].name] = ipts[i].value;
+        }
+    }
+    for(var j=0,jl=divs.length;j<jl;j++){
+        var child = divs[j].childNodes, 
+            kv = {}, k = '', key = '', val = '';
+        for(var i=0,il=child.length;i<il;i++){
+            kv = child[i];
+            if(kv.tagName=='INPUT'){
+               k = kv.getAttribute('key'); 
+               if(k=='key' && /^([\w\d]+\.)+\w+$/.test(kv.value)){
+                   key = kv.value;
+                   continue;
+               }
+               if(k=='val'){ 
+                    if(/([0-9]{1,3}\.){3}[0-9]{1,3}/.test(kv.value)||kv.value==''){
+                        val = kv.value;
+                    }else{
+                        val = '';
+                    }
+                    continue;
+               }
+            }
+        }
+        if(key!=''){ 
+            cks[key] = val; 
+            ldata.push(key+'='+val);
+        }
+        key = ''; val = '';
+    }
+    if('localStorage' in window){
+        localStorage.setItem('ldata',ldata.join('; '));
+    }
+    saveCookies();
+    return true;
 }
 function setData(){
-	for(var i in ipts){
-		if( ipts[i].name in cks){
-			ipts[i].value = cks[ipts[i].name];
+    var frag = document.createDocumentFragment(),
+        span = document.getElementsByTagName('span')[0],
+        ldata = '',
+        sNames = {};
+    //正常数据
+    for(var i=0,il=ipts.length;i<il;i++){
+        var item = ipts[i];
+        if(item.name in cks){
+            ipts[i].value = cks[item.name];
         }
-	}
+        if(item.name){ sNames[item.name] = true; }
+    }
+    //自定义数据配置了HOST的列表
+    for(var i in cks){
+        if(i in sNames){ continue; }
+        if(cks[i].length){
+            var t = document.createTextNode(i),
+                s = document.createElement('select');
+            s.name = i;
+            s.options[0] = new Option('现网Host',''); 
+            s.options[1] = new Option(cks[i],cks[i]);
+            frag.appendChild(t);
+            frag.appendChild(s);
+        }
+    }
+    span.parentNode.insertBefore(frag,span);
+    //自定义数据使用现网数据的host
+    if('localStorage' in window){
+        ldata = localStorage.getItem('ldata');
+        if(ldata!=null){
+            ldata = splitCookies(ldata);
+            frag = document.createDocumentFragment();
+            var t = 0;
+            for(var j in ldata){
+                if(j in cks){ continue; }
+                var div = odiv.cloneNode(true),
+                    child = div.childNodes;
+                if(t == 0){ div = divs[0]; child = div.childNodes; }
+                for(var i=0,il=child.length;i<il;i++){
+                    if(child[i].tagName=='INPUT'){
+                        var attr = child[i].getAttribute('key');
+                        if(attr == 'key'){
+                            child[i].value = j;
+                        }
+                        if(attr == 'val'){
+                            child[i].value = ldata[j]; 
+                        }
+                    }
+                }
+                if(t != 0){ frag.appendChild(div);}
+                t++;
+            }
+            addBtn.parentNode.insertBefore(frag,addBtn);
+        }
+    }
 }
 function splitQueryString(str){
-	var strArr = str.split(/&+/gi),obj = {};
-	for(var i=0,il=strArr.length; i<il; i++){
-		var sp = strArr[i].split(/=+/gi);
-		if(sp.length==2){
-			obj[sp[0]] = sp[1];
-		}
-	}
-	return obj;
+    var strArr = str.split(/&+/gi),obj = {};
+    for(var i=0,il=strArr.length; i<il; i++){
+        var sp = strArr[i].split(/=+/gi);
+        if(sp.length==2){
+            obj[sp[0]] = sp[1];
+        }
+    }
+    return obj;
 }
-function splitCookies(str){
-	var cookies = str.split(/;\s*/gi),ckObj = {};
-	for(var i =0,il=cookies.length; i<il; i++){
-		var obj = splitQueryString(cookies[i]);
-		for(var j in obj){
-			if(/[\w\d]+\.[\w\d]+/.test(j)){
-				ckObj[j] = obj[j];
-			}
-		}
-	}
-	return ckObj;
+function splitCookies(str) {
+    var cookies = str.split(/;\s*/gi),ckObj = {};
+    for(var i =0,il=cookies.length; i<il; i++){
+        var obj = splitQueryString(cookies[i]);
+        for(var j in obj){
+            if(/[\w\d]+\.[\w\d]+/.test(j)){
+                ckObj[j] = obj[j];
+            }
+        }
+    }
+    return ckObj;
 }
-function saveCookies()
-{
-	var dt = new Date(),dtStr = '',etStr = '', cookieStr = '';
-	dt.setTime(dt.getTime()+3600*24*7*1000);
-	dtStr = dt.toGMTString();
+function saveCookies() {
+    var dt = new Date(),dtStr = '',etStr = '', cookieStr = '';
+    dt.setTime(dt.getTime()+3600*24*7*1000);
+    dtStr = dt.toGMTString();
     dt.setTime(dt.getTime()-3600*24*8*1000);
-	etStr = dt.toGMTString();
-	for(var i in cks){
-        var estr = (cks[i] == "")?etStr:dtStr;
-		document.cookie = i + "=" + cks[i] + "; expires="+estr+"; path=/;";
-	}
+    etStr = dt.toGMTString();
+    for(var i in cks){
+        var estr = cks[i].length ? dtStr:etStr;
+        document.cookie = i + "=" + cks[i] + "; expires="+estr+"; path=/;";
+    }
 }
 (function(){
-	ipts = document.getElementsByTagName("select");
-	var ck = document.cookie;
-	cks = splitCookies(ck);
-	setData();
+    ipts = document.getElementsByTagName('select');
+    divs = document.getElementsByTagName('div');
+    odiv = divs[0].cloneNode(true);
+    addBtn = document.getElementById('addBtnOne');
+    var ck = document.cookie;
+    cks = splitCookies(ck);
+    setData();
 })();
 </script>
 </body>
