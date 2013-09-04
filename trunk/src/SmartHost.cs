@@ -16,8 +16,8 @@ using Fiddler;
 [assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2012")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
-[assembly: AssemblyVersion("1.0.2.7")]
-[assembly: AssemblyFileVersion("1.0.2.7")]
+[assembly: AssemblyVersion("1.0.2.8")]
+[assembly: AssemblyFileVersion("1.0.2.8")]
 [assembly: Fiddler.RequiredVersion("2.4.1.1")]
 
 
