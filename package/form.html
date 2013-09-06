@@ -9,7 +9,7 @@
 <meta name="url" content="http://code.google.com/p/smarthost" />
 <meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
 <style type="text/css" media="screen">
-body{margin:0;padding:0;font-size:1.2em;line-height:1em;font-weight:500;max-width:device-width;min-width:320px;}
+body{margin:0;padding:0;font-size:1.2em;line-height:1em;font-weight:600;max-width:device-width;min-width:320px;}
 form{text-align: left;margin:0; padding:0; }
 form input,form select,form button{ width:100%; line-height:1.2em;font-size:1.2em;}
 form .input{ width: 90% !important; }
@@ -18,16 +18,16 @@ form .input{ width: 90% !important; }
 <body>
 <form method="POST" action="/" onsubmit="return saveData()">
 <fieldset>
-    <legend>SmartHost配置</legend>
+    <legend>SmartHost</legend>
     localhost<select name="localhost">
-        <option value="" selected>现网Host</option>
+        <option value="" selected comment="IDC HOST">现网Host</option>
         <option value="127.0.0.1">127.0.0.1</option>
     </select>
     <span holder></span>
     Custom:
     <div class="info">
-        <input class="input" type="text" key="key" placeholder="域名" value="">
-        <input class="input" type="text" key="val" maxlength="15" placeholder="IP/留空为现网" />
+        <input class="input" type="text" key="key" placeholder="域名" placeholderEN="Domain" value="">
+        <input class="input" type="text" key="val" maxlength="15" placeholderEn="IP/Empty For IDC" placeholder="IP/留空为现网" />
         <hr border="0" color="#eeeeee"/>
     </div>
     <input type="button" onclick="addHost(this);return false;" id="addBtnOne" value="Add More" />
@@ -113,6 +113,7 @@ function setData(){
             s.name = i;
             s.isLocal = true;
             s.options[0] = new Option('现网Host',''); 
+            s.options[0].comment = "IDC HOST";
             s.options[1] = new Option(cks[i],cks[i]);
             frag.appendChild(t);
             frag.appendChild(s);
