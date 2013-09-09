@@ -82,12 +82,17 @@ function saveData(){
         }
         key = ''; val = '';item='';
     }
-    console.log(localData);
     saveItems(localData);
     return true;
 }
 function saveItems(localData){
-    var strs = [];
+    var strs = [],domains = get('domains')||'';
+    domains = domains.split('|');
+    for(var i=0,il=domains.length;i<il;i++){
+        if(!(domains[i] in localData)){
+            set(domains[i],'',-1);
+        }
+    }
     for(var i in localData){
         strs.push(i);
         set(i,localData[i],7);
@@ -185,7 +190,11 @@ function getCookie(key){
 }
 function set(key,val,expr){
     if(sLocal){
-        localStorage.setItem(oid+key,val);
+        if(expr<0){
+            localStorage.removeItem(oid+key);
+        }else{
+            localStorage.setItem(oid+key,val);
+        }
     }else{
         setCookie(key,val,expr);
     }
@@ -203,7 +212,7 @@ function get(key){
     if('oid' in gQuery){
         oid = gQuery.oid;
     }else{
-        oid = 'smarthost_domain_map_prefix';
+        oid = 'smarthost_';
     }
     oid = oid.replace(/[^\w_-]+/gi,'').substr(0,30);
     document.forms[0].action = 'done.html?'+search;
