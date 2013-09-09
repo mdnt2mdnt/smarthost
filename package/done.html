@@ -93,7 +93,7 @@ function get(key){
     if('oid' in gQuery){
         oid = gQuery.oid;
     }else{
-        oid = 'smarthost_domain_map_prefix';
+        oid = 'smarthost_';
     }
     oid = oid.replace(/[^\w_-]+/gi,'').substr(0,30);
     setData();
