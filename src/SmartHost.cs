@@ -30,7 +30,9 @@ public class SmartHost : IAutoTamper {
     private MenuItem mnuSmartHostEnabled;
     private MenuItem mnuSmartHostConfig;
     private MenuItem mnuSmartHostReadme;
+    private MenuItem mnuSmartHostAbout;
     private MenuItem mnuSplit;
+    private MenuItem mnuSplit1;
     
     public SmartHost(){
         getPrefs();
@@ -64,15 +66,27 @@ public class SmartHost : IAutoTamper {
         this.mnuSmartHostReadme.Index = 3;
         this.mnuSmartHostReadme.Text = "&Readme";
         this.mnuSmartHostReadme.Click += new EventHandler(_smarthostReadme_click);
+
+        this.mnuSplit1 = new MenuItem();
+        this.mnuSplit1.Index = 4;
+        this.mnuSplit1.Text = "-";
+        this.mnuSplit1.Checked = true;
+
+        this.mnuSmartHostAbout = new MenuItem();
+        this.mnuSmartHostAbout.Index = 5;
+        this.mnuSmartHostAbout.Text = "&About";
+        this.mnuSmartHostAbout.Click += new EventHandler(_smarthostAbout_click);
         
         this.mnuSmartHost = new MenuItem();
         this.mnuSmartHost.Text = "&SmartHost";
         this.mnuSmartHost.MenuItems.AddRange(new MenuItem[]{ 
-                        this.mnuSmartHostEnabled, 
-                        this.mnuSmartHostConfig,
-                        this.mnuSplit,
-                        this.mnuSmartHostReadme
-                        });
+                this.mnuSmartHostEnabled, 
+                this.mnuSmartHostConfig,
+                this.mnuSplit,
+                this.mnuSmartHostReadme,
+                this.mnuSplit1,
+                this.mnuSmartHostAbout
+        });
     }
     
     [CodeDescription("If Enabled, each request will be dealed")]
@@ -100,6 +114,18 @@ public class SmartHost : IAutoTamper {
         }else{
             FiddlerApplication.Log.LogString("Readme.txt not found at the Scripts folder, Please Reinstall SmartHost Plugin.");
         }
+    }
+
+    [CodeDescription("About menuItem clicked Event Handler")]
+    private void _smarthostAbout_click(object sender, EventArgs e){
+        MessageBox.Show(
+            "Smarthost For Fiddler\n-----------------------------------------------------------------"+
+            "\nA Remote IP/HOST Remaping Tool For Fiddler Making Mobile Development More Easier.\n"+
+            "\nCurrent Version: 1.0.2.8",
+            "About SmartHost",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information
+        );
     }
     
     [CodeDescription("set plugin path from registry")]
@@ -172,9 +198,9 @@ public class SmartHost : IAutoTamper {
                 if(oSession.url.Contains(".ico")){
                     oSession["x-replywithfile"] = "favicon.ico";
                 }else if(oSession.uriContains("/log/")){
-                	this.printJSLog(oSession.url.ToString());
-                	oSession["x-replywithfile"] = "blank.gif";
-            	}else{
+                    this.printJSLog(oSession.url.ToString());
+                    oSession["x-replywithfile"] = "blank.gif";
+                }else{
                     oSession["x-replywithfile"] = "form.html";
                 }
             }else if(oSession.HTTPMethodIs("POST")) {
