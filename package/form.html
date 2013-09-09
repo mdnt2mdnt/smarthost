@@ -44,13 +44,10 @@ function addHost(obj){
 function saveData(){
     ipts = document.getElementsByTagName("select");
     divs = document.getElementsByTagName('div');
-    var localData = [];
+    var localData = {};
     for(var i=0,il=ipts.length; i<il; i++){
         if(/[\w\d]+\.[\w\d]+/.test(ipts[i].name)){
-            cks[ipts[i].name] = ipts[i].value;
-        }
-        if(ipts[i].isLocal){
-            localData.push(ipts[i].name+'='+ipts[i].value);
+            localData[ipts[i].name]=ipts[i].value;
         }
     }
     for(var j=0,jl=divs.length;j<jl;j++){
@@ -77,8 +74,7 @@ function saveData(){
             }
         }
         if(key!=''){
-            cks[key] = val;
-            localData.push(key+'='+val);
+            localData[key]=val;
             if(item){
                 item.value = val;
                 item.setAttribute("value",val);
@@ -86,71 +82,76 @@ function saveData(){
         }
         key = ''; val = '';item='';
     }
-    if(sLocal){
-        localStorage.setItem('localData',localData.join('; '));
-    }
-    saveCookies();
+    console.log(localData);
+    saveItems(localData);
     return true;
 }
-function restoreData(){
+function saveItems(localData){
+    var strs = [];
+    for(var i in localData){
+        strs.push(i);
+        set(i,localData[i],7);
+    }
+    set('domains',strs.join('|'));
+}
+function restoreData(chks){
     var frag = document.createDocumentFragment(),
         span = document.getElementsByTagName('span')[0],
-        localData = '',
-        sNames = {};
+        domainStr = get('domains')||'',
+        domains = domainStr.split('|'),
+        sNames = {},
+        inputS = [];
     //正常数据
     for(var i=0,il=ipts.length;i<il;i++){
         var item = ipts[i];
-        if(item.name in cks){
-            ipts[i].value = cks[item.name];
+        if(domainStr.indexOf(item.name) != -1){
+            ipts[i].value = get(item.name);
         }
         if(item.name){ sNames[item.name] = true; }
     }
     //自定义数据配置了HOST的列表
-    for(var i in cks){
-        if(i in sNames){ continue; }
-        if(cks[i].length){
-            var t = document.createTextNode(i),
+    for(var j=0,jl=domains.length;j<jl;j++){
+        var key = domains[j],
+            val = get(key);
+        if(key in sNames){ continue; }
+        if(val && val.length){
+            var t = document.createTextNode(key),
                 s = document.createElement('select');
-            s.name = i;
+            s.name = key;
             s.isLocal = true;
             s.options[0] = new Option('现网Host','');
             s.options[0].comment = "IDC HOST";
-            s.options[1] = new Option(cks[i],cks[i]);
+            s.options[1] = new Option(val, val);
             frag.appendChild(t);
             frag.appendChild(s);
+            sNames[key] = true;
             if(s.options[1]){s.options[1].selected = true;}
+        }else{
+            inputS.push(key);
         }
     }
     span.parentNode.insertBefore(frag,span);
+    frag = document.createDocumentFragment();
     //自定义数据使用现网数据的host
-    if(sLocal){
-        localData = localStorage.getItem('localData');
-        if(localData!=null){
-            localData = splitCookies(localData);
-            frag = document.createDocumentFragment();
-            var t = 0;
-            for(var j in localData){
-                if(j in cks){ continue; }
-                var div = customDiv.cloneNode(true),
-                    child = div.childNodes;
-                if(t == 0){ div = divs[0]; child = div.childNodes; }
-                for(var i=0,il=child.length;i<il;i++){
-                    if(child[i].tagName=='INPUT'){
-                        var attr = child[i].getAttribute('key');
-                        if(attr == 'key'){
-                            child[i].value = j;
-                        }
-                        if(attr == 'val'){
-                            child[i].value = localData[j];
-                        }
-                    }
+    for(var j=0,jl=inputS.length;j<jl;j++){
+        if(sNames[inputS[j]]){ continue; }
+        var div = customDiv.cloneNode(true),
+            child = div.childNodes;
+        if(j == 0){ div = divs[0]; child = div.childNodes; }
+        for(var i=0,il=child.length;i<il;i++){
+            if(child[i].tagName=='INPUT'){
+                var attr = child[i].getAttribute('key');
+                if(attr == 'key'){
+                    child[i].value = inputS[j];
                 }
-                if(t != 0){ frag.appendChild(div);}
-                t++;
+                if(attr == 'val'){
+                    child[i].value = '';
+                }
             }
-            addBtn.parentNode.insertBefore(frag,addBtn);
         }
+        if(j != 0){ frag.appendChild(div);}
     }
+    addBtn.parentNode.insertBefore(frag,addBtn);
 }
 function splitQueryString(str){
     var strArr = str.split(/&+/gi),obj = {};
@@ -162,36 +163,54 @@ function splitQueryString(str){
     }
     return obj;
 }
-function splitCookies(str) {
-    var cookies = str.split(/;\s*/gi),ckObj = {};
+function setCookie(key,val,expr){
+    var dt = new Date(),dtStr = '',etStr = '', cookieStr = '';
+    expr = parseInt(expr);
+    expr = isNaN(expr) ? 15 : expr;
+    dt.setTime(dt.getTime() + expr * 3600*24*1000);
+    dtStr = dt.toGMTString();
+    document.cookie = oid+key + "=" + val + "; expires="+dtStr+"; path=/;";
+}
+function getCookie(key){
+    var str = document.cookie,
+        cookies = str.split(/;\s*/gi),
+        ckObj = {};
+    key = oid+key;
     for(var i =0,il=cookies.length; i<il; i++){
-        var obj = splitQueryString(cookies[i]);
-        for(var j in obj){
-            if(/[\w\d]+\.[\w\d]+/.test(j)){
-                ckObj[j] = obj[j];
-            }
+        var t = cookies[i].split('=');
+        if(t[0] == key){
+            return t[1];
         }
     }
-    return ckObj;
 }
-function saveCookies() {
-    var dt = new Date(),dtStr = '',etStr = '', cookieStr = '';
-    dt.setTime(dt.getTime()+3600*24*7*1000);
-    dtStr = dt.toGMTString();
-    dt.setTime(dt.getTime()-3600*24*8*1000);
-    etStr = dt.toGMTString();
-    for(var i in cks){
-        var estr = cks[i].length ? dtStr:etStr;
-        document.cookie = i + "=" + cks[i] + "; expires="+estr+"; path=/;";
+function set(key,val,expr){
+    if(sLocal){
+        localStorage.setItem(oid+key,val);
+    }else{
+        setCookie(key,val,expr);
+    }
+}
+function get(key){
+    if(sLocal){
+        return localStorage.getItem(oid+key);
+    }else{
+        return getCookie(key);
     }
 }
 (function(){
+    var search = location.search.length>1?location.search.substr(1):'',
+        gQuery = splitQueryString(search);
+    if('oid' in gQuery){
+        oid = gQuery.oid;
+    }else{
+        oid = 'smarthost_domain_map_prefix';
+    }
+    oid = oid.replace(/[^\w_-]+/gi,'').substr(0,30);
+    document.forms[0].action = 'done.html?'+search;
     ipts = document.getElementsByTagName('select');
     divs = document.getElementsByTagName('div');
     customDiv = divs[0].cloneNode(true);
     addBtn = document.getElementById('addBtnOne');
-    var ck = document.cookie;
-    cks = splitCookies(ck);
     restoreData();
 })();
 </script>

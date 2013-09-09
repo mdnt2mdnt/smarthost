@@ -29,46 +29,32 @@ button{ width:90%; line-height:1.2em;font-size:1.2em;margin-bottom:0.6em;}
 <span holder></span>
 <button onclick="goBack();return false;" href="javascript:void(0);">GO BACK</button>
 <script type="text/javascript">
+var sLocal = 'localStorage' in window;
 function goBack(){
-    location.href = location.href;
+    location.href = location.href.replace('/done.html','/form.html');
 }
 function setData(){
     var frag = document.createDocumentFragment(),
         span = document.getElementsByTagName('span')[0],
         a = document.getElementsByTagName('a'),
-        localData = '',
+        domains = get('domains')||'',
         sNames = {};
+    domains = domains.split('|');
     for(var i=0,il=a.length;i<il;i++){
         if(a[i].href){
             sNames[a[i].href] = true;
         }
     }
-    for(var i in cks){
-        var url = 'http://'+i+'/';
+    for(var i=0,il=domains.length;i<il;i++){
+        var url = 'http://'+domains[i]+'/';
         if(url in sNames){ continue; }
         var s = document.createElement('a'),
             b = document.createElement('br');
         s.target="_blank";
         s.href = url;
-        s.innerHTML = i;
+        s.innerHTML = domains[i];
         frag.appendChild(s);
         frag.appendChild(b);
-    }
-    if('localStorage' in window){
-        localData = localStorage.getItem('localData');
-        if(localData!=null){
-            localData = splitCookies(localData);
-            for(var j in localData){
-                if(j in cks){ continue; }
-                var s = document.createElement('a'),
-                    b = document.createElement('br');
-                s.href = 'http://'+j+'/';
-                s.target="_blank";
-                s.innerHTML = j;
-                frag.appendChild(s);
-                frag.appendChild(b);
-            }
-        }
     }
     span.parentNode.insertBefore(frag,span);
 }
@@ -82,21 +68,34 @@ function splitQueryString(str){
     }
     return obj;
 }
-function splitCookies(str) {
-    var cookies = str.split(/;\s*/gi),ckObj = {};
+function getCookie(key){
+    var str = document.cookie,
+        cookies = str.split(/;\s*/gi),
+        ckObj = {};
+    key = oid+key;
     for(var i =0,il=cookies.length; i<il; i++){
-        var obj = splitQueryString(cookies[i]);
-        for(var j in obj){
-            if(/[\w\d]+\.[\w\d]+/.test(j)){
-                ckObj[j] = obj[j];
-            }
+        var t = cookies[i].split('=');
+        if(t[0] == key){
+            return t[1];
         }
     }
-    return ckObj;
+}
+function get(key){
+    if(sLocal){
+        return localStorage.getItem(oid+key);
+    }else{
+        return getCookie(key);
+    }
 }
 (function(){
-    var ck = document.cookie;
-    cks = splitCookies(ck);
+    var search = location.search.length>1?location.search.substr(1):'',
+        gQuery = splitQueryString(search);
+    if('oid' in gQuery){
+        oid = gQuery.oid;
+    }else{
+        oid = 'smarthost_domain_map_prefix';
+    }
+    oid = oid.replace(/[^\w_-]+/gi,'').substr(0,30);
     setData();
 })();
 </script>
