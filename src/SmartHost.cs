@@ -276,7 +276,7 @@ public class SmartHost : IAutoTamper {
     private void processLogRequest(Session oSession){
         string[] query = oSession.PathAndQuery.Split(new char[]{'?','&'});
         string destIP = "" , callback = "";
-        Int32 minId = 0;
+        Int32 minId = 0, idx = 0;
         for(int i=0,il=query.Length;i<il;i++){
             if(query[i].Contains("ip=") ){
                 destIP = query[i].Split('=')[1];
@@ -294,18 +294,59 @@ public class SmartHost : IAutoTamper {
         callback = callback.Length>0 ? callback : "callback";
         if(destIP.Length>0){
             Session[] sLists = FiddlerApplication.UI.GetAllSessions();
-            string body = "";
+            string body = "[";
+            object[] lists;
             for(int i=0,il=sLists.Length;i<il;i++){
-                if(sLists[i].id < minId){ continue; }
+                if(sLists[i].id < minId || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)){ continue; }
                 if(sLists[i].m_clientIP == destIP || sLists[i].clientIP == destIP ){
-                    body += sLists[i].id + "." + sLists[i].fullUrl + "\n";
+                    if(sLists[i].responseCode>=100){
+                        body += (idx!=0?",":"")+strItem(sLists[i]);
+                        idx++;
+                    }
                 }
             }
+            body += "]";
             ResponseLogRequest(oSession, body, "application/x-javascript", callback);
         }else{
             oSession["x-replywithfile"] = "blank.gif";
             printJSLog(oSession.PathAndQuery);
         }
+    }
+    private string strItem(Session oSession){
+        string info = "", reqHead = "", reqBody = "", resHead = "" , resBody = "";
+        if(oSession.state == SessionStates.Done){
+            reqHead = Regex.Replace(oSession.oRequest.headers.ToString(),"[\r\n]+","\\n");
+            reqHead = Regex.Replace(reqHead,"\"","\\\"");
+            resHead = Regex.Replace(oSession.oResponse.headers.ToString(),"[\r\n]+","\\n");
+            resHead = Regex.Replace(resHead,"\"","\\\"");
+            
+            if(oSession.RequestMethod == "POST" || oSession.RequestMethod == "PUT"){
+                reqBody = oSession.GetRequestBodyAsString();
+                reqBody = reqBody!="" ? Regex.Replace(reqBody,"[\r\n]+","\\n"):"";
+                reqBody = reqBody.Length>0?Regex.Replace(reqBody,"\"","\\\""):"";
+            }
+            string type = oSession.oResponse.headers["Content-Type"];
+            if(type.Contains("text") || type.Contains("javascript") || type.Contains("charset")){
+                resBody = oSession.GetResponseBodyAsString();
+                //resBody = resBody.Length>0?Regex.Replace(resBody,"\\","\\\\") : "";
+                resBody = resBody.Length>0?Regex.Replace(resBody,"\"","\\\""):"";
+                resBody = resBody!="" ? Regex.Replace(resBody,"[\r\n]+","\\n"):"";
+            }else{
+                resBody = "[No Content or Binary Data]";
+            }
+        }
+        info +="{id:"+oSession.id+",method:\""+ oSession.RequestMethod+"\"";
+        info += ",clientIP:\""+(oSession.clientIP.Length>0 ? oSession.clientIP : oSession.m_clientIP)+"\"";
+        info += ",serverIP:\""+oSession.m_hostIP+"\"";
+        info += ",url:\""+System.Uri.EscapeUriString(oSession.PathAndQuery) + "\"";
+        info += ",status:"+oSession.responseCode;
+        info += ",Host:\""+oSession.hostname+(oSession.port == 80 ? "" : ":"+oSession.port)+"\"";
+        info += ",requestHeaders:\""+reqHead +"\"";
+        info += ",responseHeaders:\""+resHead +"\"";
+        info += ",requestBody:\""+reqBody+"\"";
+        info += ",responseBody:\""+resBody+"\"";
+        info += "}";
+        return info;
     }
     /*******************************REMOTE LOG PROCESSING LOGIC END********************************/
     
