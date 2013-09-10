@@ -25,6 +25,7 @@ using Fiddler;
 
 public class SmartHost : IAutoTamper {
     private bool   _tamperHost     = false;
+    private string _ipConfigServer = String.Empty;
     private string _scriptPath     = String.Empty;
     private string _pluginBase     = String.Empty;
     private string _wirelessIP     = String.Empty;
@@ -48,6 +49,7 @@ public class SmartHost : IAutoTamper {
     }
     private void getPrefs(){
         this._tamperHost = FiddlerApplication.Prefs.GetBoolPref("extensions.smarthost.enabled",false);
+        this._ipConfigServer = FiddlerApplication.Prefs.GetStringPref("extensions.smarthost.ipServerUrl","");
     }
     
     private void initializeMenu(){
@@ -120,19 +122,22 @@ public class SmartHost : IAutoTamper {
     [CodeDescription("About menuItem clicked Event Handler")]
     private void _smarthostAbout_click(object sender, EventArgs e){
         MessageBox.Show(
-            "Smarthost For Fiddler\n-----------------------------------------------------------------"+
-            "\nA Remote IP/HOST Remaping Tool For Fiddler Making Mobile Development More Easier.\n"+
-            "\nCurrent Version: 1.0.2.8",
+            "Smarthost For Fiddler\n__________________________________________________"
+            + "\nA Remote IP/HOST Remaping Tool For Fiddler\nMaking Mobile Development More Easier.\n"
+            + "\nCurrent Version: 1.0.2.8\n"
+            + "\nAny Suggestion Concat mooringniu@gmail.com",
             "About SmartHost",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information
         );
     }
+    
     [CodeDescription("print jslog to fiddler for mobile debuging")]
     private void printJSLog(string log){
         FiddlerApplication.Log.LogString(log);
     }
     
+    /*****************************PLUGIN INIT START************************************************/
     [CodeDescription("set WireLess & LanIP for future Use")]
     public void setIPAddress(){
         int cmdCount = 0;
@@ -149,11 +154,9 @@ public class SmartHost : IAutoTamper {
                     if(MO["Description"].ToString().Contains("Wireless")){
                         cmdCount += 1;
                         iip = ips[0].ToString();
-                        //sendIPCommand("iip",iip);
                     }else{
                         cmdCount += 2;
                         sip = ips[0].ToString();
-                        //sendIPCommand("sip",sip);
                     }
                 }
             }
@@ -161,17 +164,35 @@ public class SmartHost : IAutoTamper {
         if(cmdCount!=3){
             if(cmdCount == 1){
                 sip = iip;
-                //sendIPCommand("sip",iip);
             }else if(cmdCount==2){
                 iip = sip;
-                //sendIPCommand("iip",sip);
             }
         }
         this._wirelessIP = iip;
         this._lanIP = sip;
+        if(this._ipConfigServer.Length>0){
+            sendIPConfig();
+        }
         printJSLog("wirelessIP:"+iip+" lanIP:"+sip);
     }
-    
+    [CodeDescription("send IP Config for other programs")]
+    public void sendIPConfig(){
+        WebClient client = new WebClient();
+        client.Headers.Add("User-Agent", "Smarthost Fiddler Plugin Version 1.0.2.8");
+        string concat = this._ipConfigServer.Contains("?") ? "&" : "?";
+        try{
+            client.DownloadString(this._ipConfigServer+concat+"wanip="+this._wirelessIP+"&lanip="+this._lanIP);
+        }catch(Exception ex){}
+    }
+    [CodeDescription("Return Wireless and Lan IP address")]
+    private void getIPAddress(Session oSession){
+        ResponseLogRequest(
+            oSession,
+            "Wireless Proxy:"+this._wirelessIP+"\nLanIP Address:"+this._lanIP+"\n",
+            "text/plan",
+            ""
+        );
+    }
     [CodeDescription("set plugin path from registry")]
     private void setPluginPath(){
         string path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
@@ -186,8 +207,11 @@ public class SmartHost : IAutoTamper {
             FiddlerApplication.Log.LogString("Can't find User Domuments Folder");
         }
     }
+    /*****************************PLUGIN INIT END**************************************************/
+    
+    /*******************************IP/HOST REMAP CONFIG SETTING START*****************************/
     [CodeDescription("parse client post message")]
-    private void parseAndSaveConfig(string postStr,string cIP){
+    private void parseAndSavePOST(string postStr,string cIP){
         postStr = Regex.Replace(postStr,"\\s+","");
         string[] pairs = Regex.Split(postStr,"&+");
         string[] hostIP = new string[2];
@@ -207,9 +231,12 @@ public class SmartHost : IAutoTamper {
     [CodeDescription("save client configuration to userConfig")]
     private void saveConfig(string cIP, Session oSession){
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
-        parseAndSaveConfig(postStr,cIP);
+        parseAndSavePOST(postStr,cIP);
         oSession["x-replywithfile"] = "done.html";
     }
+    /*******************************IP/HOST REMAP CONFIG SETTING END*******************************/
+    
+    /*******************************IP/HOST REMAP PROCESSING LOGIC START***************************/
     [CodeDescription("Deal With Request if client IP Configed")]
     private void upRequestHost(string cIP,Session oSession){
         string hostname = oSession.hostname;
@@ -228,29 +255,34 @@ public class SmartHost : IAutoTamper {
             }
         }
     }
+    /*******************************IP/HOST REMAP PROCESSING LOGIC END*****************************/
     
-    private void ResponseLogRequest(Session oSession, string body){
+    /*******************************REMOTE LOG PROCESSING LOGIC START******************************/
+    [CodeDescription("set response header and send body")]
+    private void ResponseLogRequest(Session oSession, string body, string type, string cb){
+        if( cb.Length > 0){
+            body = "try{"+cb+"("+body+");}catch(e){}";
+        }
         oSession.utilCreateResponseAndBypassServer();
         oSession.bypassGateway = true;
         oSession.oResponse.headers.HTTPResponseCode    = 200;
         oSession.oResponse.headers.HTTPResponseStatus  = "OK";
         oSession.oResponse.headers["Server"]           = "SmartHost";
-        oSession.oResponse.headers["Content-Type"]     = "application/x-javascript";
+        oSession.oResponse.headers["Content-Type"]     = type;
         oSession.oResponse.headers["Content-Length"]   = ""+body.Length;
         oSession.utilSetResponseBody(body);
     }
-    
     [CodeDescription("process Remote Log list Processing")]
     private void processLogRequest(Session oSession){
-        String[] query = oSession.PathAndQuery.Split(new char[]{'?','&'});
+        string[] query = oSession.PathAndQuery.Split(new char[]{'?','&'});
         string destIP = "" , callback = "";
         Int32 minId = 0;
         for(int i=0,il=query.Length;i<il;i++){
-            if(query[i].Contains("rip=") ){
+            if(query[i].Contains("ip=") ){
                 destIP = query[i].Split('=')[1];
             }else if(query[i].Contains("callback=")){
                 callback = query[i].Split('=')[1];
-            }else if(query[i].Contains("mid=")){
+            }else if(query[i].Contains("id=")){
                 string mid = query[i].Split('=')[1];
                 if(mid.Length>0){
                     minId = Convert.ToInt32(mid);
@@ -269,12 +301,15 @@ public class SmartHost : IAutoTamper {
                     body += sLists[i].id + "." + sLists[i].fullUrl + "\n";
                 }
             }
-            ResponseLogRequest(oSession, body);
+            ResponseLogRequest(oSession, body, "application/x-javascript", callback);
         }else{
             oSession["x-replywithfile"] = "blank.gif";
             printJSLog(oSession.PathAndQuery);
         }
     }
+    /*******************************REMOTE LOG PROCESSING LOGIC END********************************/
+    
+    /******************************REQUEST PROCESSING ENTRY****************************************/
     [CodeDescription("Berfore Request Tamper.")]
     public void AutoTamperRequestBefore(Session oSession){
         //如果没有激活，自动退出
@@ -282,8 +317,12 @@ public class SmartHost : IAutoTamper {
         string cIP = (oSession.m_clientIP != null && oSession.m_clientIP.Length>0) ? oSession.m_clientIP : oSession.clientIP;
         string hostname = oSession.hostname;
         //如果是远程日志请求，则立即处理
-        if(CONFIG.ListenPort == oSession.port && oSession.url.Contains("/log/")){
-            processLogRequest(oSession);
+        if(CONFIG.ListenPort == oSession.port){
+            if(oSession.url.Contains("/log/")){
+                processLogRequest(oSession);
+            }else{
+                getIPAddress(oSession);
+            }
             return;
         }
         //设置IP/HOST映射关系
@@ -306,6 +345,8 @@ public class SmartHost : IAutoTamper {
                 {
                     if(oSession.url.Contains("/log/")){
                         processLogRequest(oSession);
+                    }else if(oSession.url.Contains("/ip/")){
+                        getIPAddress(oSession);
                     }else{
                         oSession["x-replywithfile"] = "form.html";
                     }
@@ -321,7 +362,6 @@ public class SmartHost : IAutoTamper {
     public void AutoTamperRequestAfter(Session oSession){ }
     public void AutoTamperResponseBefore(Session oSession){ }
     public void AutoTamperResponseAfter(Session oSession){ }
-    
     public void OnLoad(){
         FiddlerApplication.UI.mnuMain.MenuItems.Add(mnuSmartHost);
         FiddlerApplication.UI.lvSessions.AddBoundColumn("Client IP", 100, "x-clientIP");
@@ -330,7 +370,6 @@ public class SmartHost : IAutoTamper {
         FiddlerApplication.UI.lvSessions.SetColumnOrderAndWidth("Host", 3, -1); 
         FiddlerApplication.UI.lvSessions.SetColumnOrderAndWidth("Server IP", 4, -1);
     }
-    
     public void OnBeforeUnload(){
         FiddlerApplication.Prefs.SetBoolPref("extensions.smarthost.enabled",this._tamperHost);
     }
