@@ -1,21 +1,21 @@
 using System;
+using System.Management;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Windows.Forms;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Resources;
 using System.IO;
-using System.Management;
 using System.Net;
+using System.Windows.Forms;
 using Microsoft.Win32;
 using Fiddler;
 
 [assembly: AssemblyTitle("SmartHost")]
 [assembly: AssemblyDescription("A simple multiple host mapping extension for Fiddler2")]
 [assembly: AssemblyCompany("Tencent .Ltd")]
-[assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2012")]
+[assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2013")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
 [assembly: AssemblyVersion("1.0.2.8")]
@@ -43,6 +43,7 @@ public class SmartHost : IAutoTamper {
         getPrefs();
         initializeMenu();
         setPluginPath();
+        setIPAddress();
         this.usrConfig= new Dictionary<string,string>();
     }
     private void getPrefs(){
@@ -131,6 +132,46 @@ public class SmartHost : IAutoTamper {
     private void printJSLog(string log){
         FiddlerApplication.Log.LogString(log);
     }
+    
+    [CodeDescription("set WireLess & LanIP for future Use")]
+    public void setIPAddress(){
+        int cmdCount = 0;
+        string iip = "", sip = "" , info = "";
+        ManagementClass MC = new ManagementClass("Win32_NetworkAdapterConfiguration");
+        ManagementObjectCollection MOC = MC.GetInstances();
+        foreach (ManagementObject MO in MOC)
+        {
+            if(cmdCount==3){ break; }
+            if ((bool)MO["IPEnabled"] == true && (bool) MO["DHCPEnabled"] == true )
+            {
+                string[] ips = (string[])MO["IPAddress"];
+                if(ips.Length>0){
+                    if(MO["Description"].ToString().Contains("Wireless")){
+                        cmdCount += 1;
+                        iip = ips[0].ToString();
+                        //sendIPCommand("iip",iip);
+                    }else{
+                        cmdCount += 2;
+                        sip = ips[0].ToString();
+                        //sendIPCommand("sip",sip);
+                    }
+                }
+            }
+        }
+        if(cmdCount!=3){
+            if(cmdCount == 1){
+                sip = iip;
+                //sendIPCommand("sip",iip);
+            }else if(cmdCount==2){
+                iip = sip;
+                //sendIPCommand("iip",sip);
+            }
+        }
+        this._wirelessIP = iip;
+        this._lanIP = sip;
+        printJSLog("wirelessIP:"+iip+" lanIP:"+sip);
+    }
+    
     [CodeDescription("set plugin path from registry")]
     private void setPluginPath(){
         string path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
@@ -203,14 +244,17 @@ public class SmartHost : IAutoTamper {
     private void processLogRequest(Session oSession){
         String[] query = oSession.PathAndQuery.Split(new char[]{'?','&'});
         string destIP = "" , callback = "";
-        int minId = 1;
+        Int32 minId = 0;
         for(int i=0,il=query.Length;i<il;i++){
             if(query[i].Contains("rip=") ){
                 destIP = query[i].Split('=')[1];
             }else if(query[i].Contains("callback=")){
                 callback = query[i].Split('=')[1];
             }else if(query[i].Contains("mid=")){
-                minId = Convert.ToInt32(query[i].Split('=')[1]);
+                string mid = query[i].Split('=')[1];
+                if(mid.Length>0){
+                    minId = Convert.ToInt32(mid);
+                }
             }
         }
         destIP = Regex.Replace(destIP,"[^\\d\\.]+","");
