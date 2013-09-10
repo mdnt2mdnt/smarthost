@@ -291,7 +291,6 @@ public class SmartHost : IAutoTamper {
         }
         destIP = Regex.Replace(destIP,"[^\\d\\.]+","");
         callback = Regex.Replace(callback, "[^\\w\\d_\\$\\.]+","");
-        callback = callback.Length>0 ? callback : "callback";
         if(destIP.Length>0){
             Session[] sLists = FiddlerApplication.UI.GetAllSessions();
             string body = "[";
