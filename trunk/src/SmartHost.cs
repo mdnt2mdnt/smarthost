@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Resources;
 using System.IO;
+using System.Management;
+using System.Net;
 using Microsoft.Win32;
 using Fiddler;
 
@@ -24,6 +26,9 @@ using Fiddler;
 public class SmartHost : IAutoTamper {
     private bool   _tamperHost     = false;
     private string _scriptPath     = String.Empty;
+    private string _pluginBase     = String.Empty;
+    private string _wirelessIP     = String.Empty;
+    private string _lanIP          = String.Empty;
     private int    _oldProxyEnabled;
     private Dictionary<string,string> usrConfig;
     private MenuItem mnuSmartHost;
@@ -56,24 +61,19 @@ public class SmartHost : IAutoTamper {
         this.mnuSmartHostConfig.Index = 1;
         this.mnuSmartHostConfig.Text = "&Config Hosts";
         this.mnuSmartHostConfig.Click += new EventHandler(_smarthostConfig_click);
-
-        this.mnuSplit = new MenuItem();
-        this.mnuSplit.Index = 2;
-        this.mnuSplit.Text = "-";
-        this.mnuSplit.Checked = true;
         
         this.mnuSmartHostReadme   = new MenuItem();
-        this.mnuSmartHostReadme.Index = 3;
+        this.mnuSmartHostReadme.Index = 2;
         this.mnuSmartHostReadme.Text = "&Readme";
         this.mnuSmartHostReadme.Click += new EventHandler(_smarthostReadme_click);
 
-        this.mnuSplit1 = new MenuItem();
-        this.mnuSplit1.Index = 4;
-        this.mnuSplit1.Text = "-";
-        this.mnuSplit1.Checked = true;
+        this.mnuSplit = new MenuItem();
+        this.mnuSplit.Index = 3;
+        this.mnuSplit.Text = "-";
+        this.mnuSplit.Checked = true;
 
         this.mnuSmartHostAbout = new MenuItem();
-        this.mnuSmartHostAbout.Index = 5;
+        this.mnuSmartHostAbout.Index = 4;
         this.mnuSmartHostAbout.Text = "&About";
         this.mnuSmartHostAbout.Click += new EventHandler(_smarthostAbout_click);
         
@@ -82,12 +82,12 @@ public class SmartHost : IAutoTamper {
         this.mnuSmartHost.MenuItems.AddRange(new MenuItem[]{ 
                 this.mnuSmartHostEnabled, 
                 this.mnuSmartHostConfig,
-                this.mnuSplit,
                 this.mnuSmartHostReadme,
-                this.mnuSplit1,
+                this.mnuSplit,
                 this.mnuSmartHostAbout
         });
     }
+    
     
     [CodeDescription("If Enabled, each request will be dealed")]
     private void _smarthostEnabled_click(object sender, EventArgs e){
@@ -127,21 +127,24 @@ public class SmartHost : IAutoTamper {
             MessageBoxIcon.Information
         );
     }
-    
+    [CodeDescription("print jslog to fiddler for mobile debuging")]
+    private void printJSLog(string log){
+        FiddlerApplication.Log.LogString(log);
+    }
     [CodeDescription("set plugin path from registry")]
     private void setPluginPath(){
         string path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
         RegistryKey oReg = Registry.CurrentUser.OpenSubKey(path,RegistryKeyPermissionCheck.ReadSubTree);
         if( oReg != null ){
             string docPath = (string) oReg.GetValue("Personal");
-            this._scriptPath = docPath+@"\Fiddler2\Scripts\Smarthost\";
+            this._pluginBase = docPath + @"\Fiddler2\";
+            this._scriptPath = this._pluginBase + @"Scripts\Smarthost\";
             oReg.Close();
         }else{
             this._tamperHost = false;
-           FiddlerApplication.Log.LogString("Can't find User Domuments Folder");
+            FiddlerApplication.Log.LogString("Can't find User Domuments Folder");
         }
     }
-    
     [CodeDescription("parse client post message")]
     private void parseAndSaveConfig(string postStr,string cIP){
         postStr = Regex.Replace(postStr,"\\s+","");
@@ -160,22 +163,22 @@ public class SmartHost : IAutoTamper {
             }
         }
     }
-    
     [CodeDescription("save client configuration to userConfig")]
     private void saveConfig(string cIP, Session oSession){
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
         parseAndSaveConfig(postStr,cIP);
         oSession["x-replywithfile"] = "done.html";
     }
-    [CodeDescription("print jslog to fiddler for mobile debuging")]
-    private void printJSLog(string log){
-        FiddlerApplication.Log.LogString(log);
-    }
     [CodeDescription("Deal With Request if client IP Configed")]
     private void upRequestHost(string cIP,Session oSession){
         string hostname = oSession.hostname;
+        printJSLog(hostname+"==>"+this._wirelessIP+"===>"+this._lanIP);
         if( this.usrConfig.ContainsKey(cIP+"|"+hostname) ){
-            if( this.usrConfig[cIP+"|"+hostname] == "" || this.usrConfig[cIP+"|"+hostname] == null ){
+            if( this.usrConfig[cIP+"|"+hostname] == "" 
+                || this.usrConfig[cIP+"|"+hostname] == null 
+                || hostname == this._wirelessIP 
+                || hostname == this._lanIP )
+            {
                 oSession.bypassGateway = false;
                 oSession["x-overrideHost"] = null;
             }else{
@@ -185,43 +188,99 @@ public class SmartHost : IAutoTamper {
         }
     }
     
+    private void ResponseLogRequest(Session oSession, string body){
+        oSession.utilCreateResponseAndBypassServer();
+        oSession.bypassGateway = true;
+        oSession.oResponse.headers.HTTPResponseCode    = 200;
+        oSession.oResponse.headers.HTTPResponseStatus  = "OK";
+        oSession.oResponse.headers["Server"]           = "SmartHost";
+        oSession.oResponse.headers["Content-Type"]     = "application/x-javascript";
+        oSession.oResponse.headers["Content-Length"]   = ""+body.Length;
+        oSession.utilSetResponseBody(body);
+    }
+    
+    [CodeDescription("process Remote Log list Processing")]
+    private void processLogRequest(Session oSession){
+        String[] query = oSession.PathAndQuery.Split(new char[]{'?','&'});
+        string destIP = "" , callback = "";
+        int minId = 1;
+        for(int i=0,il=query.Length;i<il;i++){
+            if(query[i].Contains("rip=") ){
+                destIP = query[i].Split('=')[1];
+            }else if(query[i].Contains("callback=")){
+                callback = query[i].Split('=')[1];
+            }else if(query[i].Contains("mid=")){
+                minId = Convert.ToInt32(query[i].Split('=')[1]);
+            }
+        }
+        destIP = Regex.Replace(destIP,"[^\\d\\.]+","");
+        callback = Regex.Replace(callback, "[^\\w\\d_\\$\\.]+","");
+        callback = callback.Length>0 ? callback : "callback";
+        if(destIP.Length>0){
+            Session[] sLists = FiddlerApplication.UI.GetAllSessions();
+            string body = "";
+            for(int i=0,il=sLists.Length;i<il;i++){
+                if(sLists[i].id < minId){ continue; }
+                if(sLists[i].m_clientIP == destIP || sLists[i].clientIP == destIP ){
+                    body += sLists[i].id + "." + sLists[i].fullUrl + "\n";
+                }
+            }
+            ResponseLogRequest(oSession, body);
+        }else{
+            oSession["x-replywithfile"] = "blank.gif";
+            printJSLog(oSession.PathAndQuery);
+        }
+    }
     [CodeDescription("Berfore Request Tamper.")]
     public void AutoTamperRequestBefore(Session oSession){
-        if(!this._tamperHost){ return;}
+        //如果没有激活，自动退出
+        if(!this._tamperHost){return;}
         string cIP = (oSession.m_clientIP != null && oSession.m_clientIP.Length>0) ? oSession.m_clientIP : oSession.clientIP;
         string hostname = oSession.hostname;
-        if( this.usrConfig.ContainsKey(cIP+"|"+hostname) ){
-            //if request clients configed the host/ip list
+        //如果是远程日志请求，则立即处理
+        if(CONFIG.ListenPort == oSession.port && oSession.url.Contains("/log/")){
+            processLogRequest(oSession);
+            return;
+        }
+        //设置IP/HOST映射关系
+        if(this.usrConfig.ContainsKey(cIP+"|"+hostname))
+        {
             upRequestHost(cIP,oSession);
-        }else if(oSession.HostnameIs("smart.host")||oSession.HostnameIs("config.qq.com")){
-            if(oSession.HTTPMethodIs("GET")) {
-                if(oSession.url.Contains(".ico")){
-                    oSession["x-replywithfile"] = "favicon.ico";
-                }else if(oSession.uriContains("/log/")){
-                    this.printJSLog(oSession.url.ToString());
-                    oSession["x-replywithfile"] = "blank.gif";
-                }else{
-                    oSession["x-replywithfile"] = "form.html";
+        }
+        else if(oSession.HostnameIs("smart.host")||oSession.HostnameIs("config.qq.com"))
+        {
+            if(oSession.HTTPMethodIs("GET"))
+            {
+                string replyFile = oSession.PathAndQuery.Substring(1).Split(new char[]{'?','#'})[0].Replace('/', '\\');
+                       replyFile = replyFile.Length==0 ? "form.html" : replyFile;
+                //如果文件存在
+                if(File.Exists(this._pluginBase+@"\Captures\Responses\"+replyFile))
+                {
+                    oSession["x-replywithfile"] = replyFile;
                 }
-            }else if(oSession.HTTPMethodIs("POST")) {
-               saveConfig(cIP,oSession);
+                else
+                {
+                    if(oSession.url.Contains("/log/")){
+                        processLogRequest(oSession);
+                    }else{
+                        oSession["x-replywithfile"] = "form.html";
+                    }
+                }
+            }
+            //处理配置保存信息
+            else if(oSession.HTTPMethodIs("POST"))
+            {
+                saveConfig(cIP,oSession);
             }
         }
     }
-    
     public void AutoTamperRequestAfter(Session oSession){ }
     public void AutoTamperResponseBefore(Session oSession){ }
-    public void AutoTamperResponseAfter(Session oSession){ 
-        this.updateTimeColumn(oSession);
-    }
+    public void AutoTamperResponseAfter(Session oSession){ }
     
-    private void updateTimeColumn(Session oSession){
-        Int32 count = oSession.Timers.ServerDoneResponse.Millisecond - oSession.Timers.ClientDoneRequest.Millisecond;
-        oSession["ui-customcolumn"] += count.ToString() + "ms";
-    }
     public void OnLoad(){
         FiddlerApplication.UI.mnuMain.MenuItems.Add(mnuSmartHost);
-        FiddlerApplication.UI.lvSessions.AddBoundColumn("Client IP", 110, "x-clientIP");
+        FiddlerApplication.UI.lvSessions.AddBoundColumn("Client IP", 100, "x-clientIP");
         FiddlerApplication.UI.lvSessions.AddBoundColumn("Server IP", 110, "x-HostIP");
         FiddlerApplication.UI.lvSessions.SetColumnOrderAndWidth("Client IP", 2, -1); 
         FiddlerApplication.UI.lvSessions.SetColumnOrderAndWidth("Host", 3, -1); 
