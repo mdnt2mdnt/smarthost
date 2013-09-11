@@ -278,7 +278,7 @@ public class SmartHost : IAutoTamper {
         string[] pairs = new string[2];
         bool returnBody = false;
         string destIP = "" , callback = "";
-        Int32 id = 0, idx = 0, pageSize = 100;
+        Int32 id = 0, idx = 1, pageSize = 100;
         for(int i=0,il=query.Length;i<il;i++){
             pairs = query[i].Split(new char[]{'='});
             if(pairs.Length==2){
@@ -307,7 +307,7 @@ public class SmartHost : IAutoTamper {
                     || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)){ continue; }
                 if(sLists[i].m_clientIP == destIP || sLists[i].clientIP == destIP ){
                     if(sLists[i].responseCode>=100){
-                        body += (idx!=0?",":"")+strItem(sLists[i],returnBody);
+                        body += (idx!=1?",":"")+strItem(sLists[i],returnBody);
                         idx++;
                     }
                 }
@@ -321,31 +321,34 @@ public class SmartHost : IAutoTamper {
     private string strItem(Session oSession,bool returnBody){
         string info = "", reqHead = "", reqBody = "", resHead = "" , resBody = "", timer = "";
         if(oSession.state == SessionStates.Done){
-            reqHead = Regex.Replace(oSession.oRequest.headers.ToString(),"[\r\n]+","\\n");
-            reqHead = Regex.Replace(reqHead,"\"","\\\"");
-            resHead = Regex.Replace(oSession.oResponse.headers.ToString(),"[\r\n]+","\\n");
-            resHead = Regex.Replace(resHead,"\"","\\\"");
+            reqHead = Regex.Replace(oSession.oRequest.headers.ToString(),"[\r\n]+", @"\n");
+            reqHead = Regex.Replace(reqHead, "\"", @"\u0022");
+            resHead = Regex.Replace(oSession.oResponse.headers.ToString(),"[\r\n]+", @"\n");
+            resHead = Regex.Replace(resHead, "\"", @"\u0022");
             
             if(!Utilities.IsNullOrEmpty(oSession.requestBodyBytes)){
                 reqBody = oSession.GetRequestBodyAsString();
-                reqBody = reqBody!="" ? Regex.Replace(reqBody,"[\r\n]+","\\n"):"";
-                reqBody = reqBody.Length>0?Regex.Replace(reqBody,"\"","\\\""):"";
+                reqBody = reqBody!="" ? Regex.Replace(reqBody, "[\r\n]+", @"\n"):"";
+                reqBody = reqBody.Length>0?Regex.Replace(reqBody, "\"", @"\u0022"):"";
             }
             HTTPHeaders oHeaders = oSession.oResponse.headers;
             string type = oHeaders["Content-Type"];
-            if( returnBody 
-                && !Utilities.IsNullOrEmpty(oSession.responseBodyBytes) 
-                && (type.Contains("text") || type.Contains("javascript") || type.Contains("charset"))
+            if( returnBody && !Utilities.IsNullOrEmpty(oSession.responseBodyBytes) 
+                && ( type.Contains("text") || type.Contains("javascript") 
+                     || type.Contains("json") || type.Contains("charset") )
             ){
                 if (oHeaders.Exists("Transfer-Encoding") || oHeaders.Exists("Content-Encoding")) {
-                    byte[] arrCopy = (byte[])oSession.responseBodyBytes.Clone();
+                    byte[] value = oSession.responseBodyBytes;
+                    byte[] arrCopy = (byte[])value.Clone();
                     Utilities.utilDecodeHTTPBody(oHeaders, ref arrCopy);
-                    resBody = Utilities.ByteArrayToString(arrCopy);
+                    value = arrCopy;
+                    Encoding oEncoding = Utilities.getEntityBodyEncoding(oHeaders, value); 
+                    resBody = Utilities.GetStringFromArrayRemovingBOM(value, oEncoding);
                 }else{
                     resBody = oSession.GetResponseBodyAsString();
                 }
-                resBody = resBody.Length>0?Regex.Replace(resBody,"\"","\\\""):"";
-                resBody = resBody!="" ? Regex.Replace(resBody,"[\r\n]+","\\n"):"";
+                resBody = resBody.Length>0?Regex.Replace(resBody, "\"", @"\u0022"):"";
+                resBody = resBody!="" ? Regex.Replace(resBody, "[\r\n]+", @"\n"):"";
             }
         }
         info +="{id:"+oSession.id+",method:\""+ oSession.RequestMethod+"\"";
@@ -360,7 +363,7 @@ public class SmartHost : IAutoTamper {
         if(returnBody){
             info += ",responseBody:\""+resBody+"\"";
         }
-        timer = Regex.Replace(oSession.Timers.ToString(),"[\r\n]+","\\n");
+        timer = Regex.Replace(oSession.Timers.ToString(),"[\r\n]+", @"\n");
         info += ",times:\""+timer+"\"";
         info += "}";
         return info;

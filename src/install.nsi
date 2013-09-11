@@ -12,15 +12,11 @@ XPStyle               on
 AutoCloseWindow       false
 ShowUninstDetails     show
 LicenseBkColor        ffffff
-LicenseText           "Read Me First" "Next"
-DetailsButtonText     "Details"
+LicenseText           "README" "Next"
+DetailsButtonText     "DETAILS"
 CompletedText         "Over"
 MiscButtonText        "Previous" "Next" "Cancel" "OK"
 InstallButtonText     "Install"
-SubCaption            0   " "
-SubCaption            1   " - Components Select"
-SubCaption            3   " - Details"
-SubCaption            4   " - Over"
 
 UninstallCaption      "Remove SmartHost extension"
 UninstallButtonText   "Remove"
@@ -36,7 +32,7 @@ VIAddVersionKey CompanyName           "Tencent .Ltd"
 VIAddVersionKey FileDescription       "A Simple Host Mapping Tool for Fiddler"
 VIAddVersionKey FileVersion           1.0.2.8
 VIAddVersionKey ProductVersion        1.0.2.8
-VIAddVersionKey LegalCopyright        "Copyright Mooringniu@Tencent 2012"
+VIAddVersionKey LegalCopyright        "Copyright By mooringniu 2013"
 VIAddVersionKey InternalName          "SmartHost.exe"
 VIAddVersionKey OriginalFilename      "SmartHost.exe"
 
@@ -60,7 +56,7 @@ Section SmartHost
     SetOutPath       "$DOCUMENTS\Fiddler2\"
     CreateDirectory  $OUTDIR\Captures\Responses
     CreateDirectory  $OUTDIR\Scripts\Smarthost
-    File             "/oname=$OUTDIR\Scripts\Smarthost.dll"      	    ..\obj\Smarthost.dll
+    File             "/oname=$OUTDIR\Scripts\Smarthost.dll"              ..\obj\Smarthost.dll
     File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"      ..\package\readme.txt
     File             "/oname=$OUTDIR\Captures\Responses\form.html"      ..\package\form.html
     File             "/oname=$OUTDIR\Captures\Responses\done.html"      ..\package\done.html
@@ -104,5 +100,5 @@ Section Uninstall
     Delete        "$OUTDIR\Scripts\Smarthost\Uninstall.exe"
     Delete        "$OUTDIR\Scripts\Smarthost.dll"
     DeleteRegKey   HKCU "Software\SmartHost"
-	RMDir         "$OUTDIR\Scripts\Smarthost"
+    RMDir         "$OUTDIR\Scripts\Smarthost"
 SectionEnd
