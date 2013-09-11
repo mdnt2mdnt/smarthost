@@ -51,7 +51,6 @@ public class SmartHost : IAutoTamper {
         this._tamperHost = FiddlerApplication.Prefs.GetBoolPref("extensions.smarthost.enabled",false);
         this._ipConfigServer = FiddlerApplication.Prefs.GetStringPref("extensions.smarthost.ipServerUrl","");
     }
-    
     private void initializeMenu(){
         
         this.mnuSmartHostEnabled = new MenuItem();
@@ -105,7 +104,8 @@ public class SmartHost : IAutoTamper {
         if(File.Exists(argPath)){
             Fiddler.Utilities.RunExecutable("mshta.exe", "\""+argPath+"\"");
         }else{
-           FiddlerApplication.Log.LogString("hostEditor.hta not found at the Scripts folder, Please Reinstall SmartHost Plugin.");
+           FiddlerApplication.Log.LogString("hostEditor.hta not found at the Scripts folder,"
+                +"Please Reinstall SmartHost Plugin.");
         }
     }
     
@@ -115,14 +115,15 @@ public class SmartHost : IAutoTamper {
         if(File.Exists(argPath)){
             Fiddler.Utilities.RunExecutable("notepad.exe", "\""+argPath+"\"");
         }else{
-            FiddlerApplication.Log.LogString("Readme.txt not found at the Scripts folder, Please Reinstall SmartHost Plugin.");
+            FiddlerApplication.Log.LogString("Readme.txt not found at the Scripts folder,"
+                +"Please Reinstall SmartHost Plugin.");
         }
     }
 
     [CodeDescription("About menuItem clicked Event Handler")]
     private void _smarthostAbout_click(object sender, EventArgs e){
         MessageBox.Show(
-            "Smarthost For Fiddler\n__________________________________________________"
+            "Smarthost For Fiddler\n--------------------------------------------------"
             + "\nA Remote IP/HOST Remaping Tool For Fiddler\nMaking Mobile Development More Easier.\n"
             + "\nCurrent Version: 1.0.2.8\n"
             + "\nAny Suggestion Concat mooringniu@gmail.com",
@@ -173,7 +174,7 @@ public class SmartHost : IAutoTamper {
         if(this._ipConfigServer.Length>0){
             sendIPConfig();
         }
-        printJSLog("wirelessIP:"+iip+" lanIP:"+sip);
+        printJSLog("\nwirelessIP : "+iip+"\nlanIP:"+sip);
     }
     [CodeDescription("send IP Config for other programs")]
     public void sendIPConfig(){
@@ -215,7 +216,7 @@ public class SmartHost : IAutoTamper {
         postStr = Regex.Replace(postStr,"\\s+","");
         string[] pairs = Regex.Split(postStr,"&+");
         string[] hostIP = new string[2];
-        Char[] spliter = new Char[]{'='};
+        char[] spliter = new char[]{'='};
         for(int i=0,il=pairs.Length;i<il;i++){
             hostIP = pairs[i].Split(spliter);
             if(hostIP[0].Length==0){
@@ -240,7 +241,6 @@ public class SmartHost : IAutoTamper {
     [CodeDescription("Deal With Request if client IP Configed")]
     private void upRequestHost(string cIP,Session oSession){
         string hostname = oSession.hostname;
-        printJSLog(hostname+"==>"+this._wirelessIP+"===>"+this._lanIP);
         if( this.usrConfig.ContainsKey(cIP+"|"+hostname) ){
             if( this.usrConfig[cIP+"|"+hostname] == "" 
                 || this.usrConfig[cIP+"|"+hostname] == null 
@@ -275,17 +275,23 @@ public class SmartHost : IAutoTamper {
     [CodeDescription("process Remote Log list Processing")]
     private void processLogRequest(Session oSession){
         string[] query = oSession.PathAndQuery.Split(new char[]{'?','&'});
+        string[] pairs = new string[2];
+        bool returnBody = false;
         string destIP = "" , callback = "";
-        Int32 minId = 0, idx = 0;
+        Int32 id = 0, idx = 0, pageSize = 100;
         for(int i=0,il=query.Length;i<il;i++){
-            if(query[i].Contains("ip=") ){
-                destIP = query[i].Split('=')[1];
-            }else if(query[i].Contains("callback=")){
-                callback = query[i].Split('=')[1];
-            }else if(query[i].Contains("id=")){
-                string mid = query[i].Split('=')[1];
-                if(mid.Length>0){
-                    minId = Convert.ToInt32(mid);
+            pairs = query[i].Split(new char[]{'='});
+            if(pairs.Length==2){
+                if(pairs[0] == "ip"){
+                    destIP = pairs[1];
+                }else if(pairs[0]=="callback"){
+                    callback = pairs[1];
+                }else if(pairs[0]=="id"){
+                    id = Convert.ToInt32(pairs[1]);
+                }else if(pairs[0]=="size"){
+                    pageSize = Convert.ToInt32(pairs[1]);
+                }else if( pairs[0] == "body"){
+                    returnBody = pairs[1].Length>0 && pairs[1] != "0";
                 }
             }
         }
@@ -296,10 +302,12 @@ public class SmartHost : IAutoTamper {
             string body = "[";
             object[] lists;
             for(int i=0,il=sLists.Length;i<il;i++){
-                if(sLists[i].id < minId || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)){ continue; }
+                if( idx > pageSize ){ break; }
+                if(sLists[i].id < id 
+                    || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)){ continue; }
                 if(sLists[i].m_clientIP == destIP || sLists[i].clientIP == destIP ){
                     if(sLists[i].responseCode>=100){
-                        body += (idx!=0?",":"")+strItem(sLists[i]);
+                        body += (idx!=0?",":"")+strItem(sLists[i],returnBody);
                         idx++;
                     }
                 }
@@ -308,30 +316,36 @@ public class SmartHost : IAutoTamper {
             ResponseLogRequest(oSession, body, "application/x-javascript", callback);
         }else{
             oSession["x-replywithfile"] = "blank.gif";
-            printJSLog(oSession.PathAndQuery);
         }
     }
-    private string strItem(Session oSession){
-        string info = "", reqHead = "", reqBody = "", resHead = "" , resBody = "";
+    private string strItem(Session oSession,bool returnBody){
+        string info = "", reqHead = "", reqBody = "", resHead = "" , resBody = "", timer = "";
         if(oSession.state == SessionStates.Done){
             reqHead = Regex.Replace(oSession.oRequest.headers.ToString(),"[\r\n]+","\\n");
             reqHead = Regex.Replace(reqHead,"\"","\\\"");
             resHead = Regex.Replace(oSession.oResponse.headers.ToString(),"[\r\n]+","\\n");
             resHead = Regex.Replace(resHead,"\"","\\\"");
             
-            if(oSession.RequestMethod == "POST" || oSession.RequestMethod == "PUT"){
+            if(!Utilities.IsNullOrEmpty(oSession.requestBodyBytes)){
                 reqBody = oSession.GetRequestBodyAsString();
                 reqBody = reqBody!="" ? Regex.Replace(reqBody,"[\r\n]+","\\n"):"";
                 reqBody = reqBody.Length>0?Regex.Replace(reqBody,"\"","\\\""):"";
             }
-            string type = oSession.oResponse.headers["Content-Type"];
-            if(type.Contains("text") || type.Contains("javascript") || type.Contains("charset")){
-                resBody = oSession.GetResponseBodyAsString();
-                //resBody = resBody.Length>0?Regex.Replace(resBody,"\\","\\\\") : "";
+            HTTPHeaders oHeaders = oSession.oResponse.headers;
+            string type = oHeaders["Content-Type"];
+            if( returnBody 
+                && !Utilities.IsNullOrEmpty(oSession.responseBodyBytes) 
+                && (type.Contains("text") || type.Contains("javascript") || type.Contains("charset"))
+            ){
+                if (oHeaders.Exists("Transfer-Encoding") || oHeaders.Exists("Content-Encoding")) {
+                    byte[] arrCopy = (byte[])oSession.responseBodyBytes.Clone();
+                    Utilities.utilDecodeHTTPBody(oHeaders, ref arrCopy);
+                    resBody = Utilities.ByteArrayToString(arrCopy);
+                }else{
+                    resBody = oSession.GetResponseBodyAsString();
+                }
                 resBody = resBody.Length>0?Regex.Replace(resBody,"\"","\\\""):"";
                 resBody = resBody!="" ? Regex.Replace(resBody,"[\r\n]+","\\n"):"";
-            }else{
-                resBody = "[No Content or Binary Data]";
             }
         }
         info +="{id:"+oSession.id+",method:\""+ oSession.RequestMethod+"\"";
@@ -343,7 +357,11 @@ public class SmartHost : IAutoTamper {
         info += ",requestHeaders:\""+reqHead +"\"";
         info += ",responseHeaders:\""+resHead +"\"";
         info += ",requestBody:\""+reqBody+"\"";
-        info += ",responseBody:\""+resBody+"\"";
+        if(returnBody){
+            info += ",responseBody:\""+resBody+"\"";
+        }
+        timer = Regex.Replace(oSession.Timers.ToString(),"[\r\n]+","\\n");
+        info += ",times:\""+timer+"\"";
         info += "}";
         return info;
     }
@@ -401,7 +419,18 @@ public class SmartHost : IAutoTamper {
     }
     public void AutoTamperRequestAfter(Session oSession){ }
     public void AutoTamperResponseBefore(Session oSession){ }
-    public void AutoTamperResponseAfter(Session oSession){ }
+    public void AutoTamperResponseAfter(Session oSession){
+        if( (
+                oSession.HostnameIs("smart.host") || oSession.HostnameIs("config.qq.com")
+            )
+            || (
+                oSession.port == CONFIG.ListenPort 
+                && (oSession.hostname == this._lanIP || oSession.hostname == this._wirelessIP)
+            )
+        ){
+            oSession["ui-hide"] = "true";
+        }
+    }
     public void OnLoad(){
         FiddlerApplication.UI.mnuMain.MenuItems.Add(mnuSmartHost);
         FiddlerApplication.UI.lvSessions.AddBoundColumn("Client IP", 100, "x-clientIP");
