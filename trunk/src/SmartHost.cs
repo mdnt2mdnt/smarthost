@@ -313,7 +313,7 @@ public class SmartHost : IAutoTamper {
                 }
             }
             body += "]";
-            ResponseLogRequest(oSession, body, "application/x-javascript", callback);
+            ResponseLogRequest(oSession, body, "application/javascript", callback);
         }else{
             oSession["x-replywithfile"] = "blank.gif";
         }
