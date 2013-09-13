@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Reflection;
 using System.Resources;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.IO;
 [assembly: AssemblyDescription("Update SmartHost Plugin Version Before Compiling")]
 [assembly: AssemblyCompany("Tencent")]
 [assembly: AssemblyProduct("setVersion")]
-[assembly: AssemblyCopyright("Copyright © Mooringniu 2012")]
+[assembly: AssemblyCopyright("Copyright © Mooringniu 2013")]
 [assembly: AssemblyTrademark("SmartHost")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
