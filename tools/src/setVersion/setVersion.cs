@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Resources;
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ namespace setVersion
                     {
                         content[j] = Regex.Replace(
 							content[j],
-							@"((Assembly|Version:|VersionKey|ProductVersion).+)(\d+\.){3}\d+",
+							@"((Server|Assembly|Version|VersionKey|ProductVersion).+)(\d+\.){3}\d+",
 							"${1}"+args[0]
 						);
                         fp.WriteLine(content[j]);
