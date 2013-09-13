@@ -20,14 +20,14 @@ form .input{ width: 90% !important; }
 <fieldset>
     <legend>SmartHost</legend>
     localhost<select name="localhost">
-        <option value="" selected comment="IDC HOST">ÏÖÍøHost</option>
+        <option value="" selected comment="IDC HOST">ç°ç½‘Host</option>
         <option value="127.0.0.1">127.0.0.1</option>
     </select>
     <span holder></span>
     Custom:
     <div class="info">
-        <input class="input" type="text" key="key" placeholder="ÓòÃû" placeholderEN="Domain" value="">
-        <input class="input" type="text" key="val" maxlength="15" placeholderEn="IP/Empty For IDC" placeholder="IP/Áô¿ÕÎªÏÖÍø" />
+        <input class="input" type="text" key="key" placeholder="åŸŸå" placeholderEN="Domain" value="">
+        <input class="input" type="text" key="val" maxlength="15" placeholderEn="IP/Empty For IDC" placeholder="IP/ç•™ç©ºä¸ºç°ç½‘" />
         <hr border="0" color="#eeeeee"/>
     </div>
     <input type="button" onclick="addHost(this);return false;" id="addBtnOne" value="Add More" />
@@ -106,15 +106,22 @@ function restoreData(chks){
         domains = domainStr.split('|'),
         sNames = {},
         inputS = [];
-    //Õı³£Êı¾İ
+    //æ­£å¸¸æ•°æ®
     for(var i=0,il=ipts.length;i<il;i++){
         var item = ipts[i];
         if(domainStr.indexOf(item.name) != -1){
-            ipts[i].value = get(item.name);
+            var val = get(item.name);
+            for(var j=0,jl=ipts[i].options.length;j<jl;j++){
+                if(ipts[i].options[i].value == val){
+                    ipts[i].selectedIndex = j;
+                    break;
+                }
+            }
+            //ipts[i].value = get(item.name);
         }
         if(item.name){ sNames[item.name] = true; }
     }
-    //×Ô¶¨ÒåÊı¾İÅäÖÃÁËHOSTµÄÁĞ±í
+    //è‡ªå®šä¹‰æ•°æ®é…ç½®äº†HOSTçš„åˆ—è¡¨
     for(var j=0,jl=domains.length;j<jl;j++){
         var key = domains[j],
             val = get(key);
@@ -124,7 +131,7 @@ function restoreData(chks){
                 s = document.createElement('select');
             s.name = key;
             s.isLocal = true;
-            s.options[0] = new Option('ÏÖÍøHost','');
+            s.options[0] = new Option('ç°ç½‘Host','');
             s.options[0].comment = "IDC HOST";
             s.options[1] = new Option(val, val);
             frag.appendChild(t);
@@ -137,7 +144,7 @@ function restoreData(chks){
     }
     span.parentNode.insertBefore(frag,span);
     frag = document.createDocumentFragment();
-    //×Ô¶¨ÒåÊı¾İÊ¹ÓÃÏÖÍøÊı¾İµÄhost
+    //è‡ªå®šä¹‰æ•°æ®ä½¿ç”¨ç°ç½‘æ•°æ®çš„host
     for(var j=0,jl=inputS.length;j<jl;j++){
         if(sNames[inputS[j]]){ continue; }
         var div = customDiv.cloneNode(true),
