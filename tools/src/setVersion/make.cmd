@@ -1,5 +1,5 @@
 @echo off
-@PATH=C:\Windows\Microsoft.NET\Framework\v3.5;d:\Programs\NSIS
+@PATH=C:\Windows\Microsoft.NET\Framework\v3.5;D:\Programs\NSIS
 @title Making setVersion Tools
 @echo on
 @csc /o /w:1 /out:..\..\setVersion.exe setVersion.cs /nologo /utf8output
