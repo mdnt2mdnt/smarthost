@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Resources;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Windows.Forms;
 using Microsoft.Win32;
@@ -20,7 +21,7 @@ using Fiddler;
 [assembly: AssemblyTrademark("SmartHost")]
 [assembly: AssemblyVersion("1.0.2.8")]
 [assembly: AssemblyFileVersion("1.0.2.8")]
-
+[assembly: Fiddler.RequiredVersion("2.4.1.1")]
 
 public class SmartHost : IAutoTamper
 {
@@ -44,7 +45,7 @@ public class SmartHost : IAutoTamper
     {
         getPrefs();
         initializeMenu();
-        setPluginPath();
+        getPluginPath();
         setIPAddress();
         this.usrConfig = new Dictionary<string, string>();
     }
@@ -92,7 +93,6 @@ public class SmartHost : IAutoTamper
                 this.mnuSmartHostAbout
         });
     }
-
 
     [CodeDescription("If Enabled, each request will be dealed")]
     private void _smarthostEnabled_click(object sender, EventArgs e)
@@ -194,12 +194,13 @@ public class SmartHost : IAutoTamper
         }
         this._wirelessIP = iip;
         this._lanIP = sip;
-        if (this._ipConfigServer.Length > 0)
+        if (this._ipConfigServer.StartsWith("http://"))
         {
             sendIPConfig();
         }
         printJSLog("\nwirelessIP : " + iip + "\nlanIP:" + sip);
     }
+
     [CodeDescription("send IP Config for other programs")]
     public void sendIPConfig()
     {
@@ -213,6 +214,7 @@ public class SmartHost : IAutoTamper
         }
         catch (Exception ex) { }
     }
+
     [CodeDescription("Return Wireless and Lan IP address")]
     private void getIPAddress(Session oSession)
     {
@@ -220,11 +222,13 @@ public class SmartHost : IAutoTamper
             oSession,
             "Wireless Proxy:" + this._wirelessIP + "\nLanIP Address:" + this._lanIP + "\n",
             "text/plan",
+            "",
             ""
         );
     }
+
     [CodeDescription("set plugin path from registry")]
-    private void setPluginPath()
+    private void getPluginPath()
     {
         string path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
         RegistryKey oReg = Registry.CurrentUser.OpenSubKey(path, RegistryKeyPermissionCheck.ReadSubTree);
@@ -254,11 +258,11 @@ public class SmartHost : IAutoTamper
         for (int i = 0, il = pairs.Length; i < il; i++)
         {
             hostIP = pairs[i].Split(spliter);
-            if (hostIP[0].Length == 0)
+            if (String.IsNullOrEmpty(hostIP[0]))
             {
                 continue;
             }
-            if (hostIP[1].Length == 0 && this.usrConfig.ContainsKey(cIP + "|" + hostIP[0]))
+            if (String.IsNullOrEmpty(hostIP[1]) && this.usrConfig.ContainsKey(cIP + "|" + hostIP[0]))
             {
                 this.usrConfig.Remove(cIP + "|" + hostIP[0]);
             }
@@ -268,6 +272,7 @@ public class SmartHost : IAutoTamper
             }
         }
     }
+
     [CodeDescription("save client configuration to userConfig")]
     private void saveConfig(string cIP, Session oSession)
     {
@@ -303,7 +308,7 @@ public class SmartHost : IAutoTamper
 
     /*******************************REMOTE LOG PROCESSING LOGIC START******************************/
     [CodeDescription("set response header and send body")]
-    private void ResponseLogRequest(Session oSession, string body, string type, string cb)
+    private void ResponseLogRequest(Session oSession, string body, string type, string cb, string downName)
     {
         if (cb.Length > 0)
         {
@@ -316,19 +321,20 @@ public class SmartHost : IAutoTamper
         oSession.oResponse.headers["Server"] = "SmartHost/1.0.2.8";
         oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
         oSession.oResponse.headers["Content-Type"] = type;
+        if (downName.Length>0)
+        {
+            oSession.oResponse.headers["Content-Disposition"] = downName;
+        }
         oSession.oResponse.headers["Content-Length"] = "" + body.Length;
         oSession.utilSetResponseBody(body);
     }
-    [CodeDescription("download sessions as saz for remote use")]
-    private void downloadLogRequest(Session oSession)
-    {
-    }
+
     [CodeDescription("process Remote Log list Processing")]
     private void processLogRequest(Session oSession)
     {
         string[] query = oSession.PathAndQuery.Split(new char[] { '?', '&' });
         string[] pairs = new string[2];
-        Session[] lists;
+        Session[] sLists = FiddlerApplication.UI.GetAllSessions();
         bool returnBody = false, download = false;
         string destIP = "", callback = "";
         Int32 id = 0, idx = 1, pageSize = 100;
@@ -357,7 +363,7 @@ public class SmartHost : IAutoTamper
                 {
                     returnBody = pairs[1].Length > 0 && pairs[1] != "0";
                 }
-                else if (pairs[0] == "download")
+                else if (pairs[0] == "saz")
                 {
                     download = pairs[1].Length > 0 && pairs[1] != "0";
                 }
@@ -365,26 +371,34 @@ public class SmartHost : IAutoTamper
         }
         destIP = Regex.Replace(destIP, "[^\\d\\.]+", "");
         callback = Regex.Replace(callback, "[^\\w\\d_\\$\\.]+", "");
-        if (destIP.Length > 0)
+        if (download)
         {
-            Session[] sLists = FiddlerApplication.UI.GetAllSessions();
+            downloadLogRequest(oSession,sLists,destIP,pageSize);
+            return;
+        }
+        if (!String.IsNullOrEmpty(destIP))
+        {
+            int iMin = Math.Min(pageSize, sLists.Length);
+            bool[] dIndex = new bool[iMin];
             string body = "[";
-            for (int i = 0, il = sLists.Length; i < il; i++)
+            for (int i = 0; i < iMin; i++)
             {
                 if (idx > pageSize) { break; }
                 if (sLists[i].id < id
-                    || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)) { continue; }
+                    || sLists[i].state < SessionStates.Done
+                    || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)
+                )
+                {
+                    continue;
+                }
                 if (sLists[i].m_clientIP == destIP || sLists[i].clientIP == destIP)
                 {
-                    if (sLists[i].responseCode >= 100)
-                    {
-                        body += (idx != 1 ? "," : "") + strItem(sLists[i], returnBody);
-                        idx++;
-                    }
+                    body += (idx != 1 ? "," : "") + strItem(sLists[i], returnBody);
+                    idx++;
                 }
             }
             body += "]";
-            ResponseLogRequest(oSession, body, "application/javascript", callback);
+            ResponseLogRequest(oSession, body, "application/javascript", callback,"");
         }
         else
         {
@@ -394,7 +408,7 @@ public class SmartHost : IAutoTamper
                  + "http://" + this._lanIP + ":" + CONFIG.ListenPort + "/log/?ip=127.0.0.1&size=10&callback=console.log\n"
                  + "support params: ip, id, size, body, callback, download\n"
                  + "\nMore Help Concat mooringniu"
-                , "text/plan; charset=utf-8", "");
+                , "text/plan; charset=utf-8", "","");
         }
     }
     private string strItem(Session oSession, bool returnBody)
@@ -411,11 +425,12 @@ public class SmartHost : IAutoTamper
             {
                 reqBody = oSession.GetRequestBodyAsString();
                 reqBody = reqBody != "" ? Regex.Replace(reqBody, "[\r\n]+", @"\n") : "";
-                reqBody = reqBody.Length > 0 ? Regex.Replace(reqBody, "\"", @"\u0022") : "";
+                reqBody = !String.IsNullOrEmpty(reqBody) ? Regex.Replace(reqBody, "\"", @"\u0022") : "";
             }
             HTTPHeaders oHeaders = oSession.oResponse.headers;
             string type = oHeaders["Content-Type"];
             if (returnBody && !Utilities.IsNullOrEmpty(oSession.responseBodyBytes)
+                && !Utilities.IsBinaryMIME(type) 
                 && (type.Contains("text") || type.Contains("javascript")
                      || type.Contains("json") || type.Contains("charset"))
             )
@@ -433,8 +448,8 @@ public class SmartHost : IAutoTamper
                 {
                     resBody = oSession.GetResponseBodyAsString();
                 }
-                resBody = resBody.Length > 0 ? Regex.Replace(resBody, "\"", @"\u0022") : "";
-                resBody = resBody != "" ? Regex.Replace(resBody, "[\r\n]+", @"\n") : "";
+                resBody = !String.IsNullOrEmpty(resBody) ? Regex.Replace(resBody, "\"", @"\u0022") : "";
+                resBody = !String.IsNullOrEmpty(resBody) ? Regex.Replace(resBody, "[\r\n]+", @"\n") : "";
             }
         }
         info += "{id:" + oSession.id + ",method:\"" + oSession.RequestMethod + "\"";
@@ -463,7 +478,7 @@ public class SmartHost : IAutoTamper
     {
         //如果没有激活，自动退出
         if (!this._tamperHost) { return; }
-        string cIP = (oSession.m_clientIP != null && oSession.m_clientIP.Length > 0) ? oSession.m_clientIP : oSession.clientIP;
+        string cIP = !String.IsNullOrEmpty(oSession.m_clientIP) ? oSession.m_clientIP : oSession.clientIP;
         string hostname = oSession.hostname;
         string host = oSession.host.Split(new char[] { ':' })[0];
         //printJSLog(host+"=="+this._lanIP+"==="+this._wirelessIP);
@@ -480,7 +495,7 @@ public class SmartHost : IAutoTamper
             if (oSession.HTTPMethodIs("GET"))
             {
                 string replyFile = oSession.PathAndQuery.Substring(1).Split(new char[] { '?', '#' })[0].Replace('/', '\\');
-                replyFile = replyFile.Length == 0 ? "form.html" : replyFile;
+                replyFile = String.IsNullOrEmpty(replyFile) ? "form.html" : replyFile;
                 //如果文件存在
                 if (File.Exists(this._pluginBase + @"\Captures\Responses\" + replyFile))
                 {
@@ -539,4 +554,26 @@ public class SmartHost : IAutoTamper
         FiddlerApplication.Prefs.SetBoolPref("extensions.smarthost.enabled", this._tamperHost);
     }
     public void OnBeforeReturningError(Session oSession) { }
+
+    [CodeDescription("download sessions as saz for remote use")]
+    private void downloadLogRequest(Session oSession,Session[] sLists, string destIP, int pageSize)
+    {
+        if (sLists.Length<1)
+        {
+            ResponseLogRequest(oSession, "No Log for Your Request", "text/plain", "", "");
+            return;
+        }
+        string name = oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP;
+        string file = this._pluginBase + @"\Captures\Responses\" + name + ".saz";
+        List<Session> dLists = new List<Session>();
+        bool ret = Utilities.WriteSessionArchive(file, sLists, "", true);
+        if (ret)
+        {
+            oSession["x-replywithfile"] = name + ".saz";
+        }
+        else
+        {
+            ResponseLogRequest(oSession, "Not Ready", "text/plan", "","");
+        }
+    }
 }
