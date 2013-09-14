@@ -12,13 +12,13 @@ XPStyle               on
 AutoCloseWindow       false
 ShowUninstDetails     show
 LicenseBkColor        ffffff
-LicenseText           "README" "Next"
+LicenseText           "Ready To Intall Smarthost Extension for Fiddler?" "Next"
 DetailsButtonText     "DETAILS"
-CompletedText         "Over"
+CompletedText         "Completed"
 MiscButtonText        "Previous" "Next" "Cancel" "OK"
 InstallButtonText     "Install"
 
-UninstallCaption      "Remove SmartHost extension"
+UninstallCaption      "Remove SmartHost Extension"
 UninstallButtonText   "Remove"
 UninstallIcon         "..\package\favicon.ico"
 UninstallText         "Are you Sure" "Smarthost path:"
