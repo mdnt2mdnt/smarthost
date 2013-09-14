@@ -34,7 +34,7 @@ namespace setVersion
                     {
                         content[j] = Regex.Replace(
 							content[j],
-							@"((Server|Assembly|Version|VersionKey|ProductVersion).+)(\d+\.){3}\d+",
+							@"((AssemblyVersion|FileVersion|ProductVersion|SmartHost).+)(\d+\.){3}\d+",
 							"${1}"+args[0]
 						);
                         fp.WriteLine(content[j]);
