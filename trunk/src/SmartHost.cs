@@ -421,7 +421,7 @@ public class SmartHost : IAutoTamper
             resHead = Regex.Replace(oSession.oResponse.headers.ToString(), "[\r\n]+", @"\n");
             resHead = Regex.Replace(resHead, "\"", @"\u0022");
 
-            if (!Utilities.IsNullOrEmpty(oSession.requestBodyBytes))
+            if (oSession.requestBodyBytes.Length>0)
             {
                 reqBody = oSession.GetRequestBodyAsString();
                 reqBody = reqBody != "" ? Regex.Replace(reqBody, "[\r\n]+", @"\n") : "";
@@ -429,7 +429,7 @@ public class SmartHost : IAutoTamper
             }
             HTTPHeaders oHeaders = oSession.oResponse.headers;
             string type = oHeaders["Content-Type"];
-            if (returnBody && !Utilities.IsNullOrEmpty(oSession.responseBodyBytes)
+            if (returnBody && oSession.responseBodyBytes.Length>0
                 && !Utilities.IsBinaryMIME(type) 
                 && (type.Contains("text") || type.Contains("javascript")
                      || type.Contains("json") || type.Contains("charset"))
@@ -452,7 +452,7 @@ public class SmartHost : IAutoTamper
                 resBody = !String.IsNullOrEmpty(resBody) ? Regex.Replace(resBody, "[\r\n]+", @"\n") : "";
             }
         }
-        info += "{id:" + oSession.id + ",method:\"" + oSession.RequestMethod + "\"";
+        info += "{id:" + oSession.id;
         info += ",status:" + oSession.responseCode;
         info += ",clientIP:\"" + (oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP) + "\"";
         info += ",serverIP:\"" + oSession.m_hostIP + "\"";
