@@ -2,9 +2,8 @@
 <html>
 <head>
 <title>SmartHost</title>
-<meta charset="gb2312" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="content-type" content="text/html; charset=gb2312" />
+<meta http-equiv="content-type" content="text/html; charset=GB2312" />
 <meta name="author" content="mooringniu" />
 <meta name="url" content="http://code.google.com/p/smarthost" />
 <meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
@@ -20,14 +19,14 @@ form .input{ width: 90% !important; }
 <fieldset>
     <legend>SmartHost</legend>
     localhost<select name="localhost">
-        <option value="" selected comment="IDC HOST">鐜扮綉Host</option>
+        <option value="" selected comment="IDC HOST">现网Host</option>
         <option value="127.0.0.1">127.0.0.1</option>
     </select>
     <span holder></span>
     Custom:
     <div class="info">
-        <input class="input" type="text" key="key" placeholder="鍩熷悕" placeholderEN="Domain" value="">
-        <input class="input" type="text" key="val" maxlength="15" placeholderEn="IP/Empty For IDC" placeholder="IP/鐣欑┖涓虹幇缃�" />
+        <input class="input" type="text" key="key" placeholder="Domain" value="">
+        <input class="input" type="text" key="val" maxlength="15" placeholder="IP/Empty For IDC" placeholder="IP/留空表示现网" />
         <hr border="0" color="#eeeeee"/>
     </div>
     <input type="button" onclick="addHost(this);return false;" id="addBtnOne" value="Add More" />
@@ -106,22 +105,19 @@ function restoreData(chks){
         domains = domainStr.split('|'),
         sNames = {},
         inputS = [];
-    //姝ｅ父鏁版嵁
     for(var i=0,il=ipts.length;i<il;i++){
         var item = ipts[i];
         if(domainStr.indexOf(item.name) != -1){
             var val = get(item.name);
             for(var j=0,jl=ipts[i].options.length;j<jl;j++){
-                if(ipts[i].options[i].value == val){
+                if(ipts[i].options[j].value == val){
                     ipts[i].selectedIndex = j;
                     break;
                 }
             }
-            //ipts[i].value = get(item.name);
         }
         if(item.name){ sNames[item.name] = true; }
-    }
-    //鑷畾涔夋暟鎹厤缃簡HOST鐨勫垪琛�
+    } 
     for(var j=0,jl=domains.length;j<jl;j++){
         var key = domains[j],
             val = get(key);
@@ -131,7 +127,7 @@ function restoreData(chks){
                 s = document.createElement('select');
             s.name = key;
             s.isLocal = true;
-            s.options[0] = new Option('鐜扮綉Host','');
+            s.options[0] = new Option('现网Host','');
             s.options[0].comment = "IDC HOST";
             s.options[1] = new Option(val, val);
             frag.appendChild(t);
@@ -144,7 +140,6 @@ function restoreData(chks){
     }
     span.parentNode.insertBefore(frag,span);
     frag = document.createDocumentFragment();
-    //鑷畾涔夋暟鎹娇鐢ㄧ幇缃戞暟鎹殑host
     for(var j=0,jl=inputS.length;j<jl;j++){
         if(sNames[inputS[j]]){ continue; }
         var div = customDiv.cloneNode(true),
