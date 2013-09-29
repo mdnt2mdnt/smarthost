@@ -9,6 +9,7 @@ using System.Resources;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Fiddler;
@@ -46,13 +47,20 @@ public class SmartHost : IAutoTamper
         getPrefs();
         initializeMenu();
         getPluginPath();
-        setIPAddress();
+        
         this.usrConfig = new Dictionary<string, string>();
     }
     private void getPrefs()
     {
         this._tamperHost = FiddlerApplication.Prefs.GetBoolPref("extensions.smarthost.enabled", false);
         this._ipConfigServer = FiddlerApplication.Prefs.GetStringPref("extensions.smarthost.setip", "");
+        if( this._ipConfigServer.Length>0 && this._ipConfigServer.StartsWith("http:")){
+            setIPAddress();
+            NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(networdAddressChangeHandler);
+        }
+    }
+    private void networdAddressChangeHandler(object sender, EventArgs e){
+        setIPAddress();
     }
     private void initializeMenu()
     {
