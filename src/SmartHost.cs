@@ -64,7 +64,6 @@ public class SmartHost : IAutoTamper
     }
     private void initializeMenu()
     {
-
         this.mnuSmartHostEnabled = new MenuItem();
         this.mnuSmartHostEnabled.Index = 0;
         this.mnuSmartHostEnabled.Text = "&Enabled";
@@ -352,15 +351,21 @@ public class SmartHost : IAutoTamper
             ResponseLogRequest(oSession, "No Log for Your Request", "text/plain", "");
             return;
         }
-        string name = oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP;
-        string file = this._pluginBase + @"\Captures\Responses\" + name + ".saz";
-        List<Session> dLists = new List<Session>();
+        int Count = 0;
         for(int i=0,il=sLists.Length;i<il;i++){
-            if (sLists[i].m_clientIP == destIP && sLists[i].clientIP == destIP){}else{
-                sLists[i]["ui-hide"] = "true";
+            if (sLists[i].oFlags["x-clientIP"] == destIP){
+                Count++;
             }
         }
-        bool ret = Utilities.WriteSessionArchive(file, sLists, "", true);
+        Session[] dLists = new Session[Count];
+        for(int i=0,j=0,il=sLists.Length;i<il;i++){
+            if(j<Count && sLists[i].oFlags["x-clientIP"] == destIP ){
+                dLists[j++] = sLists[i];
+            }
+        }
+        string name = oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP;
+        string file = this._pluginBase + @"\Captures\Responses\" + name + ".saz";
+        bool ret = Utilities.WriteSessionArchive(file, dLists, "", true);
         if (ret)
         {
             oSession.utilCreateResponseAndBypassServer();
