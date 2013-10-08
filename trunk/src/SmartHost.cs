@@ -572,9 +572,11 @@ public class SmartHost : IAutoTamper
             {
                 saveConfig(cIP, oSession);
             }
-        }else if(oSession.HostnameIs("www.airport.us")
-                || oSession.HostnameIs("www.thinkdifferent.us")
-                || oSession.HostnameIs("www.itools.info") ){
+        }else if( oSession.oRequest.headers["User-Agent"].Contains("Mac OS X")
+                && (oSession.HostnameIs("www.airport.us")
+                    || oSession.HostnameIs("www.thinkdifferent.us")
+                    || oSession.HostnameIs("www.itools.info")
+                )){
             ResponseLogRequest(
                 oSession, 
                 "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>",
