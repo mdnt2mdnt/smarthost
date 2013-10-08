@@ -47,7 +47,6 @@ public class SmartHost : IAutoTamper
         getPrefs();
         initializeMenu();
         getPluginPath();
-        
         this.usrConfig = new Dictionary<string, string>();
     }
     private void getPrefs()
@@ -55,12 +54,13 @@ public class SmartHost : IAutoTamper
         this._tamperHost = FiddlerApplication.Prefs.GetBoolPref("extensions.smarthost.enabled", false);
         this._ipConfigServer = FiddlerApplication.Prefs.GetStringPref("extensions.smarthost.setip", "");
         if( this._ipConfigServer.Length>0 && this._ipConfigServer.StartsWith("http:")){
-            setIPAddress();
+            getSysIPs();
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(networdAddressChangeHandler);
         }
     }
-    private void networdAddressChangeHandler(object sender, EventArgs e){
-        setIPAddress();
+    private void networdAddressChangeHandler(object sender, EventArgs e)
+    {
+        getSysIPs();
     }
     private void initializeMenu()
     {
@@ -162,7 +162,7 @@ public class SmartHost : IAutoTamper
 
     /*****************************PLUGIN INIT START************************************************/
     [CodeDescription("set WireLess & LanIP for future Use")]
-    public void setIPAddress()
+    public void getSysIPs()
     {
         int cmdCount = 0;
         string iip = "", sip = "", info = "";
@@ -204,13 +204,13 @@ public class SmartHost : IAutoTamper
         this._lanIP = sip;
         if (this._ipConfigServer.StartsWith("http://"))
         {
-            sendIPConfig();
+            reportSysIPs();
         }
         printJSLog("\nwirelessIP : " + iip + "\nlanIP:" + sip);
     }
 
     [CodeDescription("send IP Config for other programs")]
-    public void sendIPConfig()
+    public void reportSysIPs()
     {
         if (!this._ipConfigServer.StartsWith("http://")) { return; }
         string concat = this._ipConfigServer.Contains("?") ? "&" : "?";
@@ -236,7 +236,7 @@ public class SmartHost : IAutoTamper
     }
 
     [CodeDescription("Return Wireless and Lan IP address")]
-    private void getIPAddress(Session oSession)
+    private void logSysIps(Session oSession)
     {
         ResponseLogRequest(
             oSession,
@@ -559,7 +559,7 @@ public class SmartHost : IAutoTamper
                     }
                     else if (oSession.url.Contains("/ip/"))
                     {
-                        getIPAddress(oSession);
+                        logSysIps(oSession);
                     }
                     else
                     {
