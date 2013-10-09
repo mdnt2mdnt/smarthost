@@ -144,7 +144,8 @@ public class SmartHost : IAutoTamper
     {
         MessageBox.Show(
             "Smarthost For Fiddler\n--------------------------------------------------"
-            + "\nA Remote IP/HOST Remaping Tool For Fiddler\nMaking Mobile Development More Easier.\n"
+            + "\nA Remote IP/HOST Remaping Tool For Fiddler"
+            + "\nMaking Mobile Development More Easier.\n"
             + "\nFileVersion: 1.0.2.8\n"
             + "\nAny Suggestion Concat mooringniu@gmail.com",
             "About SmartHost",
@@ -213,11 +214,15 @@ public class SmartHost : IAutoTamper
     {
         if (!this._ipConfigServer.StartsWith("http://")) { return; }
         string concat = this._ipConfigServer.Contains("?") ? "&" : "?";
-        string url = this._ipConfigServer + concat + "wanip=" + this._wirelessIP + "&lanip=" + this._lanIP;
+        string url = this._ipConfigServer 
+                    + concat 
+                    + "wanip=" + this._wirelessIP 
+                    + "&lanip=" + this._lanIP;
         HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create(url);
         if (CONFIG.sGatewayUsername != null && CONFIG.sGatewayPassword != null)
         {
-            httpWebRequest.Proxy.Credentials = (ICredentials) new NetworkCredential(CONFIG.sGatewayUsername, CONFIG.sGatewayPassword);
+            httpWebRequest.Proxy.Credentials = (ICredentials) 
+                    new NetworkCredential(CONFIG.sGatewayUsername, CONFIG.sGatewayPassword);
         }
         else
         {
@@ -240,7 +245,7 @@ public class SmartHost : IAutoTamper
         ResponseLogRequest(
             oSession,
             "Wireless Proxy:" + this._wirelessIP + "\nLanIP Address:" + this._lanIP + "\n",
-            "text/plan",
+            "text/plain",
             ""
         );
     }
@@ -267,7 +272,7 @@ public class SmartHost : IAutoTamper
 
     /*******************************IP/HOST REMAP CONFIG SETTING START*****************************/
     [CodeDescription("parse client post message")]
-    private void parseAndSavePOST(string postStr, string cIP)
+    private void parseAndSaveConfig(string postStr, string cIP)
     {
         postStr = Regex.Replace(postStr, "\\s+", "");
         string[] pairs = Regex.Split(postStr, "&+");
@@ -292,17 +297,17 @@ public class SmartHost : IAutoTamper
     }
 
     [CodeDescription("save client configuration to userConfig")]
-    private void saveConfig(string cIP, Session oSession)
+    private void processConfig(string cIP, Session oSession)
     {
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
-        parseAndSavePOST(postStr, cIP);
+        parseAndSaveConfig(postStr, cIP);
         oSession["x-replywithfile"] = "done.html";
     }
     /*******************************IP/HOST REMAP CONFIG SETTING END*******************************/
 
     /*******************************IP/HOST REMAP PROCESSING LOGIC START***************************/
     [CodeDescription("Deal With Request if client IP Configed")]
-    private void upRequestHost(string cIP, Session oSession)
+    private void tamperRequestHost(string cIP, Session oSession)
     {
         string hostname = oSession.hostname;
         if (this.usrConfig.ContainsKey(cIP + "|" + hostname))
@@ -378,7 +383,7 @@ public class SmartHost : IAutoTamper
         }
         else
         {
-            ResponseLogRequest(oSession, "Not Ready", "text/plan", "");
+            ResponseLogRequest(oSession, "Not Ready", "text/plain", "");
         }
     }
     
@@ -456,14 +461,24 @@ public class SmartHost : IAutoTamper
         else
         {
             ResponseLogRequest(
-                oSession
-                , "SmartHost Remote Log Helper:\n\nRequest URL Exmaple: \n"
-                 + "http://" + this._lanIP + ":" + CONFIG.ListenPort + "/log/?ip=127.0.0.1&size=10&callback=console.log\n"
-                 + "Support params: ip, id, size, body, callback, saz\n"
+                oSession,
+                 "SmartHost Remote Log Helper:\n\nRequest URL Exmaple: \n"
+                 + "http://" + this._lanIP + ":" + CONFIG.ListenPort + "/log/?ip=127.0.0.1&saz=1\n"
+                 + "http://" + this._lanIP + ":" + CONFIG.ListenPort + "/ip/\n"
+                 + "\n/log/ request URL Support params: ip, saz, id, size, body, callback\n"
+                 + " ip      : required the client whose log will Access\n"
+                 + " saz     : optional 1 to download the log\n"
+                 + " id      : optional the session start index\n"
+                 + " size    : optional max sessions access(except download)\n"
+                 + " body    : optional 1 to return text requests body\n"
+                 + " callback: optional for jsonp request\n"
+                 + "     if saz is supplied as 1, saz package will be sent back\n"
+                 + "     otherwise json or jsonp format will be sent back relies on the callback param\n"
+                 + "\n/ip/ request URL returns the default wireless/Lan Proxy IP address\n" 
                  + "\nYou see this because you visit a page that does not Exists"
                  + "\nMore Help Concat mooringniu or visit http://code.google.com/p/smarthost"
-                 + "\n\nGenerated by SmartHost/1.0.2.8"
-                , "text/plan; charset=utf-8", "");
+                 + "\n\nGenerated by SmartHost/1.0.2.8 (mooringniu@gmail.com)"
+                , "text/plain; charset=utf-8", "");
         }
     }
     private string strItem(Session oSession, bool returnBody)
@@ -509,9 +524,13 @@ public class SmartHost : IAutoTamper
         }
         info += "{id:" + oSession.id;
         info += ",status:" + oSession.responseCode;
-        info += ",clientIP:\"" + (oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP) + "\"";
+        info += ",clientIP:\"" + (
+                    oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP
+                ) + "\"";
         info += ",serverIP:\"" + oSession.m_hostIP + "\"";
-        info += ",Host:\"" + oSession.hostname + (oSession.port == 80 ? "" : ":" + oSession.port) + "\"";
+        info += ",host:\"" + oSession.hostname + (
+                    oSession.port == 80 ? "" : ":" + oSession.port
+                ) + "\"";
         info += ",url:\"" + System.Uri.EscapeUriString(oSession.PathAndQuery) + "\"";
         info += ",requestHeaders:\"" + reqHead + "\"";
         info += ",responseHeaders:\"" + resHead + "\"";
@@ -540,12 +559,10 @@ public class SmartHost : IAutoTamper
         //设置IP/HOST映射关系
         if (this.usrConfig.ContainsKey(cIP + "|" + hostname))
         {
-            upRequestHost(cIP, oSession);
+            tamperRequestHost(cIP, oSession);
         }
-        else if (oSession.HostnameIs("smart.host") || oSession.HostnameIs("config.qq.com")
-         || (CONFIG.ListenPort == oSession.port
-                && (host == this._lanIP || host == this._wirelessIP || host.Contains("127.0.0.")))
-        )
+        else if ( oSession.HostnameIs("smart.host") || oSession.HostnameIs("config.qq.com")
+         || (CONFIG.ListenPort == oSession.port && (host == this._lanIP || host == this._wirelessIP)))
         {
             if (oSession.HTTPMethodIs("GET"))
             {
@@ -575,13 +592,14 @@ public class SmartHost : IAutoTamper
             //处理配置保存信息
             else if (oSession.HTTPMethodIs("POST"))
             {
-                saveConfig(cIP, oSession);
+                processConfig(cIP, oSession);
             }
-        }else if( oSession.oRequest.headers["User-Agent"].Contains("Mac OS X")
+        }
+        else if( oSession.oRequest.headers["User-Agent"].Contains("Mac OS X")
                 && (oSession.HostnameIs("www.airport.us")
                     || oSession.HostnameIs("www.thinkdifferent.us")
-                    || oSession.HostnameIs("www.itools.info")
-                )){
+                    || oSession.HostnameIs("www.itools.info")))
+        {
             ResponseLogRequest(
                 oSession, 
                 "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>",
