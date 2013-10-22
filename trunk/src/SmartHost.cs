@@ -204,7 +204,7 @@ public class SmartHost : IAutoTamper
         this._lanIP = sip;
         if (this._ipConfigServer.StartsWith("http://"))
         {
-            reportSysIPs();
+            try{reportSysIPs();}catch(Exception e){}
         }
         printJSLog("\nwirelessIP : " + iip + "\nlanIP:" + sip);
     }
@@ -370,7 +370,8 @@ public class SmartHost : IAutoTamper
         }
         string name = oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP;
         string file = this._pluginBase + @"\Captures\Responses\" + name + ".saz";
-        bool ret = Utilities.WriteSessionArchive(file, dLists, "", true);
+        bool ret = false;
+        try{ ret = Utilities.WriteSessionArchive(file, dLists, "", true); }catch(Exception e){}
         if (ret)
         {
             oSession.utilCreateResponseAndBypassServer();
