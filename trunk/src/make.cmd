@@ -1,5 +1,5 @@
 @echo off
-set FIDDLER="C:\Program Files\Fiddler\Fiddler.exe"
+set FIDDLER="C:\Program Files\Fiddler2\Fiddler.exe"
 PATH=C:\Windows\Microsoft.NET\Framework\v2.0.50727;c:\Program Files\NSIS\
 @del /f /q ..\obj\SmartHost.dll ..\obj\SmartHost.exe
 title Making SmartHost Plugin
