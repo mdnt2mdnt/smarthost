@@ -24,8 +24,8 @@ form .input{ width: 90% !important; }
     <input type="submit" value="Submit">
 </fieldset>
 <div>
-    设置此项后,你所有的请求包将被转发到指定的远程代理的IP:端口上,请在远程IP机器上设置HOST/IP
-    config页设置的IP将全部失效
+    设置此项后,你所有的请求包将被转发到指定的远程代理的IP:端口上,请在远程IP机器上设置HOST/IP映射关系
+    <br/>config页设置的IP将全部失效
 </div>
 </form>
 <script type="text/javascript">
@@ -36,8 +36,12 @@ function saveData(){
         alert("请正确输入远程代理IP:端口");
         return false;
     }
-    if(sLocal && remote.value.length){
-        localStorage.setItem('remoteProxy',remote.value);
+    if(sLocal){
+        if(remote.value.length>10){
+            localStorage.setItem('remoteProxy',remote.value);
+        }else{
+            localStorage.remoteItem('remoteProxy');
+        }
     }
     return true;
 }
