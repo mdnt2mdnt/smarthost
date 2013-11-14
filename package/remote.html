@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SmartHost</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="content-type" content="text/html; charset=GB2312" />
+<meta name="author" content="mooringniu" />
+<meta name="url" content="http://code.google.com/p/smarthost" />
+<meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
+<style type="text/css" media="screen">
+body{margin:0;padding:0;font-size:1.2em;line-height:1em;font-weight:600;max-width:device-width;min-width:320px;}
+form{text-align: left;margin:0; padding:0; }
+form input,form select,form button{ width:100%; line-height:1.2em;font-size:1.2em;}
+form .input{ width: 90% !important; }
+</style>
+</head>
+<body>
+<form method="POST" action="/" onsubmit="return saveData()">
+<fieldset>
+    <legend>SmartHost</legend>
+    远程代理IP:端口:<br/>
+    <input type="text" id="remoteProxy" name="remoteProxy" placeholder="192.168.1.8:8888"/>
+    <br/> <br/>
+    <input type="submit" value="Submit">
+</fieldset>
+<div>
+    设置此项后,你所有的请求包将被转发到指定的远程代理的IP:端口上,请在远程IP机器上设置HOST/IP
+    config页设置的IP将全部失效
+</div>
+</form>
+<script type="text/javascript">
+var sLocal = 'localStorage' in window;
+function saveData(){
+    var remote = document.getElementById('remoteProxy');
+    if(remote.value.length >0 && !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}$/.test(remote.value)){
+        alert("请正确输入远程代理IP:端口");
+        return false;
+    }
+    if(sLocal && remote.value.length){
+        localStorage.setItem('remoteProxy',remote.value);
+    }
+    return true;
+}
+if(sLocal){
+    var ip = localStorage.getItem('remoteProxy');
+    if(ip){
+        document.getElementById("remoteProxy").value = ip;
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SmartHost</title>
+<meta charset="gb2312" />
+<meta http-equiv="content-type" content="text/html; charset=GB2312"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="author" content="mooringniu" />
+<meta name="url" content="http://code.google.com/p/smarthost" />
+<meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
+<style type="text/css">
+body{
+    margin:0px;padding:0px;
+    line-height:1.6em;
+    font-size:1.3em;
+    font-weight:600;
+    text-align:center;
+    text-decoration:none;
+    max-width:device-width;min-width:320px;
+}
+h1{margin:0;}
+button{ width:90%; line-height:1.2em;font-size:1.2em;margin-bottom:0.6em;}
+</style>
+</head>
+<body>
+<h1>Done</h1>
+<hr/>
+<span id="remoteProxy"></span>
+<span holder></span>
+<button onclick="goBack();return false;" href="javascript:void(0);">GO BACK</button>
+<script type="text/javascript">
+var sLocal = 'localStorage' in window;
+function goBack(){
+    location.href = '/remote.html';
+}
+(function(){
+   if(sLocal){
+        var ip = localStorage.getItem('remoteProxy');
+        if(ip){
+            document.getElementById('remoteProxy').innerHTML = '远程代理:'+ip;
+        }
+    }else{
+        document.getElementById('remoteProxy').innerHTML = '远程代理设置完毕';
+    }
+})();
+</script>
+</body>
+</html>

@@ -25,13 +25,13 @@ UninstallText         "Are you Sure" "Smarthost path:"
 UninstPage            uninstConfirm
 UninstPage            instfiles
 
-VIProductVersion                      1.0.2.8
+VIProductVersion                      1.1.0.0
 VIAddVersionKey ProductName           "SmartHost"
 VIAddVersionKey Comments              "All Right Reserved By Mooring"
 VIAddVersionKey CompanyName           "Tencent .Ltd"
 VIAddVersionKey FileDescription       "A Simple Host Mapping Tool for Fiddler"
-VIAddVersionKey FileVersion           1.0.2.8
-VIAddVersionKey ProductVersion        1.0.2.8
+VIAddVersionKey FileVersion           1.1.0.0
+VIAddVersionKey ProductVersion        1.1.0.0
 VIAddVersionKey LegalCopyright        "Copyright By mooringniu 2013"
 VIAddVersionKey InternalName          "SmartHost.exe"
 VIAddVersionKey OriginalFilename      "SmartHost.exe"
@@ -56,10 +56,12 @@ Section SmartHost
     SetOutPath       "$DOCUMENTS\Fiddler2\"
     CreateDirectory  $OUTDIR\Captures\Responses
     CreateDirectory  $OUTDIR\Scripts\Smarthost
-    File             "/oname=$OUTDIR\Scripts\Smarthost.dll"              ..\obj\Smarthost.dll
+    File             "/oname=$OUTDIR\Scripts\Smarthost.dll"             ..\obj\Smarthost.dll
     File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"      ..\package\readme.txt
     File             "/oname=$OUTDIR\Captures\Responses\form.html"      ..\package\form.html
+    File             "/oname=$OUTDIR\Captures\Responses\remote.html"    ..\package\remote.html
     File             "/oname=$OUTDIR\Captures\Responses\done.html"      ..\package\done.html
+    File             "/oname=$OUTDIR\Captures\Responses\rdone.html"     ..\package\rdone.html
     File             "/oname=$OUTDIR\Captures\Responses\blank.gif"      ..\package\blank.gif
     File             "/oname=$OUTDIR\Captures\Responses\favicon.ico"    ..\package\favicon.ico
     File             "/oname=$OUTDIR\Scripts\Smarthost\smarthost.ico"   ..\package\favicon.ico
@@ -90,6 +92,8 @@ Section Uninstall
     Delete        "$OUTDIR\Captures\Responses\blank.gif"
     Delete        "$OUTDIR\Captures\Responses\form.html"
     Delete        "$OUTDIR\Captures\Responses\done.html"
+    Delete        "$OUTDIR\Captures\Responses\rdone.html"
+    Delete        "$OUTDIR\Captures\Responses\remote.html"
     Delete        "$OUTDIR\Captures\Responses\favicon.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\smarthost.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\hosts"

@@ -9,6 +9,9 @@
 visit http://code.google.com/p/smarthost/downloads/list for update
 
 VERSION HISTORY:
+1.1.0.0
+2013/11/14   add UpStreaming Proxy Support
+
 1.0.2.8
 2013/09/04   Making host configuration possible at mobile
 
