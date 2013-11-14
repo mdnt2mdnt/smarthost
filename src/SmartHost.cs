@@ -314,8 +314,10 @@ public class SmartHost : IAutoTamper
             oSession["x-replywithfile"] = "rdone.html";
         }else{
             oSession["x-replywithfile"] = "done.html";
-            printJSLog(cIP + " remoteProxy "+ this.usrConfig[cIP+"|remoteProxy"] + " removed ");
-            this.usrConfig.Remove(cIP+"|remoteProxy");
+            if(this.usrConfig.ContainsKey(cIP+"|remoteProxy")){
+                printJSLog(cIP + " remoteProxy "+ this.usrConfig[cIP+"|remoteProxy"] + " removed ");
+                this.usrConfig.Remove(cIP+"|remoteProxy");
+            }
         }
     }
     /*******************************IP/HOST REMAP CONFIG SETTING END*******************************/
@@ -624,6 +626,7 @@ public class SmartHost : IAutoTamper
         if(!isConfig && this.usrConfig.ContainsKey(cIP+"|remoteProxy") && this.usrConfig[cIP+"|remoteProxy"].Length>10){
             oSession.bypassGateway = true;
             oSession["x-overrideHost"] = this.usrConfig[cIP+"|remoteProxy"];
+            oSession.oRequest.headers["clientIP"] = cIP;
         }
     }
     public void AutoTamperRequestAfter(Session oSession) { }
