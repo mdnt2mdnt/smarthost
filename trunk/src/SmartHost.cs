@@ -20,8 +20,8 @@ using Fiddler;
 [assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2013")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
-[assembly: AssemblyVersion("1.0.2.8")]
-[assembly: AssemblyFileVersion("1.0.2.8")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 [assembly: Fiddler.RequiredVersion("2.4.1.1")]
 
 public class SmartHost : IAutoTamper
@@ -146,7 +146,7 @@ public class SmartHost : IAutoTamper
             "Smarthost For Fiddler\n--------------------------------------------------"
             + "\nA Remote IP/HOST Remaping Tool For Fiddler"
             + "\nMaking Mobile Development More Easier.\n"
-            + "\nFileVersion: 1.0.2.8\n"
+            + "\nFileVersion: 1.1.0.0\n"
             + "\nAny Suggestion Concat mooringniu@gmail.com",
             "About SmartHost",
             MessageBoxButtons.OK,
@@ -228,7 +228,7 @@ public class SmartHost : IAutoTamper
         {
             httpWebRequest.Proxy.Credentials = CredentialCache.DefaultCredentials;
         }
-        httpWebRequest.UserAgent = "SmartHost/1.0.2.8";
+        httpWebRequest.UserAgent = "SmartHost/1.1.0.0";
         httpWebRequest.Referer = "http://config.qq.com";
         httpWebRequest.KeepAlive = false;
         HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse();
@@ -272,18 +272,26 @@ public class SmartHost : IAutoTamper
 
     /*******************************IP/HOST REMAP CONFIG SETTING START*****************************/
     [CodeDescription("parse client post message")]
-    private void parseAndSaveConfig(string postStr, string cIP)
+    private bool parseAndSaveConfig(string postStr, string cIP)
     {
         postStr = Regex.Replace(postStr, "\\s+", "");
         string[] pairs = Regex.Split(postStr, "&+");
         string[] hostIP = new string[2];
         char[] spliter = new char[] { '=' };
+        bool isRemote = false;
         for (int i = 0, il = pairs.Length; i < il; i++)
         {
             hostIP = pairs[i].Split(spliter);
-            if (String.IsNullOrEmpty(hostIP[0]))
-            {
-                continue;
+            if (String.IsNullOrEmpty(hostIP[0])) { continue; }
+            if( hostIP[0] == "remoteProxy"){
+                if(String.IsNullOrEmpty(hostIP[1])){
+                    this.usrConfig.Remove(cIP + "|remoteProxy");
+                }else{
+                    isRemote = true;
+                    hostIP[1] = hostIP[1].Replace("%3A",":");
+                    printJSLog(cIP+" remoteProxy Setting To: "+hostIP[1]);
+                    this.usrConfig[cIP + "|remoteProxy"] = hostIP[1];
+                }
             }
             if (String.IsNullOrEmpty(hostIP[1]) && this.usrConfig.ContainsKey(cIP + "|" + hostIP[0]))
             {
@@ -294,14 +302,21 @@ public class SmartHost : IAutoTamper
                 this.usrConfig[cIP + "|" + hostIP[0]] = hostIP[1];
             }
         }
+        return isRemote;
     }
 
     [CodeDescription("save client configuration to userConfig")]
     private void processConfig(string cIP, Session oSession)
     {
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
-        parseAndSaveConfig(postStr, cIP);
-        oSession["x-replywithfile"] = "done.html";
+        bool ret = parseAndSaveConfig(postStr, cIP);
+        if(ret){
+            oSession["x-replywithfile"] = "rdone.html";
+        }else{
+            oSession["x-replywithfile"] = "done.html";
+            printJSLog(cIP + " remoteProxy "+ this.usrConfig[cIP+"|remoteProxy"] + " removed ");
+            this.usrConfig.Remove(cIP+"|remoteProxy");
+        }
     }
     /*******************************IP/HOST REMAP CONFIG SETTING END*******************************/
 
@@ -341,7 +356,7 @@ public class SmartHost : IAutoTamper
         oSession.bypassGateway = true;
         oSession.oResponse.headers.HTTPResponseCode = 200;
         oSession.oResponse.headers.HTTPResponseStatus = "OK";
-        oSession.oResponse.headers["Server"] = "SmartHost/1.0.2.8";
+        oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.0";
         oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
         oSession.oResponse.headers["Content-Type"] = type;
         oSession.oResponse.headers["Content-Length"] = "" + body.Length;
@@ -378,7 +393,7 @@ public class SmartHost : IAutoTamper
             oSession.bypassGateway = true;
             oSession.oResponse.headers.HTTPResponseCode = 302;
             oSession.oResponse.headers.HTTPResponseStatus = "302 Moved Temporarily";
-            oSession.oResponse.headers["Server"] = "SmartHost/1.0.2.8";
+            oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.0";
             oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
             oSession.oResponse.headers["Location"] = "http://"+oSession.host+"/"+name+".saz";
         }
@@ -478,7 +493,7 @@ public class SmartHost : IAutoTamper
                  + "\n/ip/ request URL returns the default wireless/Lan Proxy IP address\n" 
                  + "\nYou see this because you visit a page that does not Exists"
                  + "\nMore Help Concat mooringniu or visit http://code.google.com/p/smarthost"
-                 + "\n\nGenerated by SmartHost/1.0.2.8 (mooringniu@gmail.com)"
+                 + "\n\nGenerated by SmartHost/1.1.0.0 (mooringniu@gmail.com)"
                 , "text/plain; charset=utf-8", "");
         }
     }
@@ -556,15 +571,17 @@ public class SmartHost : IAutoTamper
         string cIP = !String.IsNullOrEmpty(oSession.m_clientIP) ? oSession.m_clientIP : oSession.clientIP;
         string hostname = oSession.hostname;
         string host = oSession.host.Split(new char[] { ':' })[0];
+        bool   isConfig = false;
+
         //printJSLog(host+"=="+this._lanIP+"==="+this._wirelessIP);
         //设置IP/HOST映射关系
         if (this.usrConfig.ContainsKey(cIP + "|" + hostname))
         {
             tamperRequestHost(cIP, oSession);
         }
-        else if ( oSession.HostnameIs("smart.host") || oSession.HostnameIs("config.qq.com")
-         || (CONFIG.ListenPort == oSession.port && (host == this._lanIP || host == this._wirelessIP)))
+        else if ( oSession.HostnameIs("smart.host") || oSession.HostnameIs("config.qq.com") || (CONFIG.ListenPort == oSession.port && (host == this._lanIP || host == this._wirelessIP)))
         {
+            isConfig = true;
             if (oSession.HTTPMethodIs("GET"))
             {
                 string replyFile = oSession.PathAndQuery.Substring(1).Split(new char[] { '?', '#' })[0].Replace('/', '\\');
@@ -596,15 +613,17 @@ public class SmartHost : IAutoTamper
                 processConfig(cIP, oSession);
             }
         }
-        else if( oSession.oRequest.headers["User-Agent"].Contains("Mac OS X")
-                && (oSession.HostnameIs("www.airport.us")
-                    || oSession.HostnameIs("www.thinkdifferent.us")
-                    || oSession.HostnameIs("www.itools.info")))
+        else if( oSession.oRequest.headers["User-Agent"].Contains("Mac OS X") && (oSession.HostnameIs("www.airport.us") || oSession.HostnameIs("www.thinkdifferent.us") || oSession.HostnameIs("www.itools.info"))) 
         {
             ResponseLogRequest(
                 oSession, 
                 "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>",
                 "text/html", "");
+        }
+        //打开远程调试后，全部请求都转到远程调试上
+        if(!isConfig && this.usrConfig.ContainsKey(cIP+"|remoteProxy") && this.usrConfig[cIP+"|remoteProxy"].Length>10){
+            oSession.bypassGateway = true;
+            oSession["x-overrideHost"] = this.usrConfig[cIP+"|remoteProxy"];
         }
     }
     public void AutoTamperRequestAfter(Session oSession) { }
