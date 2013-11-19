@@ -59,6 +59,7 @@ Section SmartHost
     File             "/oname=$OUTDIR\Scripts\Smarthost.dll"             ..\obj\Smarthost.dll
     File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"      ..\package\readme.txt
     File             "/oname=$OUTDIR\Captures\Responses\form.html"      ..\package\form.html
+    File             "/oname=$OUTDIR\Captures\Responses\help.txt"       ..\package\help.txt
     File             "/oname=$OUTDIR\Captures\Responses\remote.html"    ..\package\remote.html
     File             "/oname=$OUTDIR\Captures\Responses\done.html"      ..\package\done.html
     File             "/oname=$OUTDIR\Captures\Responses\rdone.html"     ..\package\rdone.html
@@ -93,6 +94,7 @@ Section Uninstall
     Delete        "$OUTDIR\Scripts\Smarthost\README.txt"
     Delete        "$OUTDIR\Captures\Responses\blank.gif"
     Delete        "$OUTDIR\Captures\Responses\form.html"
+    Delete        "$OUTDIR\Captures\Responses\help.txt"
     Delete        "$OUTDIR\Captures\Responses\done.html"
     Delete        "$OUTDIR\Captures\Responses\rdone.html"
     Delete        "$OUTDIR\Captures\Responses\remote.html"
