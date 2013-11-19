@@ -82,7 +82,7 @@ function saveData(){
         dt.setTime(dt.getTime()+24*3600*1000*31);
         document.cookie = 'mode='+mode+'; expires='+dt.toGMTString()+'; path=/'; 
     }
-    return false;
+    return true;
 }
 if(sLocal){
     var proxy = localStorage.getItem('remoteProxy'),
