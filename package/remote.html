@@ -66,19 +66,36 @@ function saveData(){
             return false;
         }
         remote.value = ip.value+':'+port.value;
-        alert(remote.value);
         if(sLocal){
             localStorage.setItem('remoteProxy',remote.value);
+        }else{
+            var dt = new Date();
+            dt.setTime(dt.getTime()+24*3600*1000*31);
+            document.cookie = 'remoteProxy='+encodeURIComponent(remote.value)+'; expires='+dt.toGMTString()+'; path=/'; 
         }
+
     }
     if(sLocal){
         localStorage.setItem('mode',mode);
+    }else{
+        var dt = new Date();
+        dt.setTime(dt.getTime()+24*3600*1000*31);
+        document.cookie = 'mode='+mode+'; expires='+dt.toGMTString()+'; path=/'; 
     }
     return false;
 }
 if(sLocal){
     var proxy = localStorage.getItem('remoteProxy'),
         mode = localStorage.getItem('mode');
+    if(!proxy){
+        var cookies = document.cookie.split('; ');
+        for(var i=0,il=cookies.length;i<il;i++){
+            if(cookies[i].indexOf('remoteProxy=')==0){
+                proxy = decodeURIComponent(cookies[i]).split('=')[1];
+                break;
+            }
+        }
+    }
     if(proxy){
         remote.value = proxy;
         proxy = proxy.split(':');

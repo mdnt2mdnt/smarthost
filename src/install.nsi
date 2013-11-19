@@ -69,6 +69,8 @@ Section SmartHost
     File             "/oname=$OUTDIR\Scripts\Smarthost\extend.js"       ..\package\extend.js
     File             "/oname=$OUTDIR\Scripts\Smarthost\jquery.js"       ..\package\jquery.js
     File             "/oname=$OUTDIR\Scripts\Smarthost\style.css"       ..\package\style.css
+    CreateDirectory  "$OUTDIR\Captures\Responses\Configs"
+    CreateDirectory  "$OUTDIR\Captures\Responses\Packages"
     WriteUninstaller "$OUTDIR\Scripts\Smarthost\Uninstall.exe"
     WriteRegStr HKCU "Software\SmartHost" "HostPath" "$OUTDIR"
     WriteRegStr HKCU "Software\SmartHost" "InstallPath" "$OUTDIR"
@@ -105,4 +107,6 @@ Section Uninstall
     Delete        "$OUTDIR\Scripts\Smarthost.dll"
     DeleteRegKey   HKCU "Software\SmartHost"
     RMDir         "$OUTDIR\Scripts\Smarthost"
+    RMDir         "$OUTDIR\Captures\Responses\Configs"
+    RMDir         "$OUTDIR\Captures\Responses\Packages"
 SectionEnd

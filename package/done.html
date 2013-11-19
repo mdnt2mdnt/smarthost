@@ -31,7 +31,8 @@ button{ width:90%; line-height:1.2em;font-size:1.2em;margin-bottom:0.6em;}
 <script type="text/javascript">
 var sLocal = 'localStorage' in window;
 function goBack(){
-    location.href = '/form.html';
+    var opt = location.href.split('/')
+    location.href = '/form.html'+location.search;
 }
 function setData(){
     var frag = document.createDocumentFragment(),
