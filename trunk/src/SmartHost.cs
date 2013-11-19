@@ -404,9 +404,9 @@ public class SmartHost : IAutoTamper
         try{ ret = Utilities.WriteSessionArchive(file, dLists, "", true); }catch(Exception e){}
         if (ret)
         {
-            oSession.utilCreateResponseAndBypassServer();
+            //oSession.utilCreateResponseAndBypassServer();
             oSession.bypassGateway = true;
-            oSession.oResponse.headers.HTTPResponseCode = 302;
+            oSession.responseCode = 302;
             oSession.oResponse.headers.HTTPResponseStatus = "Moved Temporarily";
             oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.0";
             oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
@@ -619,7 +619,10 @@ public class SmartHost : IAutoTamper
                     }
                     else
                     {
-                        ResponseLogRequest(oSession, "404 Not Found","text/plain","");
+                        oSession.utilCreateResponseAndBypassServer();
+                        oSession.responseCode = 404;
+                        oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.0";
+                        oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
                     }
                 }
             }
