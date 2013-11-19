@@ -1,3 +1,7 @@
+/*
+ * Copyright by mooringniu@gmail.com
+ * Any Suggestion Email ME 
+ */
 using System;
 using System.Management;
 using System.Collections;
@@ -234,7 +238,7 @@ public class SmartHost : IAutoTamper
         HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse();
         if (httpWebResponse.StatusCode == HttpStatusCode.OK)
         {
-            printJSLog(url + " request has been sent successfully");
+            printJSLog(url);
         }
         httpWebResponse.Close();
     }
@@ -292,6 +296,9 @@ public class SmartHost : IAutoTamper
                     printJSLog(cIP+" remoteProxy Setting To: "+hostIP[1]);
                     this.usrConfig[cIP + "|remoteProxy"] = hostIP[1];
                 }
+            }else if(hostIP[0] == "oid" && !String.IsNullOrEmpty(hostIP[1]) && hostIP[1] != "Smarthost_"){
+                this.saveConfigToFile(postStr,hostIP[1]);
+                continue;
             }
             if (String.IsNullOrEmpty(hostIP[1]) && this.usrConfig.ContainsKey(cIP + "|" + hostIP[0]))
             {
@@ -303,6 +310,12 @@ public class SmartHost : IAutoTamper
             }
         }
         return isRemote;
+    }
+    [CodeDescription("save Config File To String")]
+    private void saveConfigToFile(string postStr, string oid){
+        oid = Regex.Replace( oid, "[^a-z0-9_\\-\\.]+", "" );
+        string file = this._pluginBase + @"\Captures\Responses\Configs\" + oid + ".txt";
+        System.IO.File.WriteAllText(file, postStr);
     }
 
     [CodeDescription("save client configuration to userConfig")]
@@ -386,7 +399,7 @@ public class SmartHost : IAutoTamper
             }
         }
         string name = oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP;
-        string file = this._pluginBase + @"\Captures\Responses\" + name + ".saz";
+        string file = this._pluginBase + @"\Captures\Responses\Packages\" + name + ".saz";
         bool ret = false;
         try{ ret = Utilities.WriteSessionArchive(file, dLists, "", true); }catch(Exception e){}
         if (ret)
@@ -394,10 +407,10 @@ public class SmartHost : IAutoTamper
             oSession.utilCreateResponseAndBypassServer();
             oSession.bypassGateway = true;
             oSession.oResponse.headers.HTTPResponseCode = 302;
-            oSession.oResponse.headers.HTTPResponseStatus = "302 Moved Temporarily";
+            oSession.oResponse.headers.HTTPResponseStatus = "Moved Temporarily";
             oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.0";
             oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
-            oSession.oResponse.headers["Location"] = "http://"+oSession.host+"/"+name+".saz";
+            oSession.oResponse.headers["Location"] = "http://"+oSession.host+"/Packages/"+name+".saz";
         }
         else
         {
@@ -586,8 +599,9 @@ public class SmartHost : IAutoTamper
             isConfig = true;
             if (oSession.HTTPMethodIs("GET"))
             {
-                string replyFile = oSession.PathAndQuery.Substring(1).Split(new char[] { '?', '#' })[0].Replace('/', '\\');
-                replyFile = String.IsNullOrEmpty(replyFile) ? "form.html" : replyFile;
+                string pathName = oSession.PathAndQuery.Substring(1).Split(new char[] { '?', '#' })[0];
+                string replyFile = pathName.Replace('/', '\\');
+                replyFile = pathName == "" ? "form.html" : replyFile;
                 //如果文件存在
                 if (File.Exists(this._pluginBase + @"\Captures\Responses\" + replyFile))
                 {
@@ -605,7 +619,7 @@ public class SmartHost : IAutoTamper
                     }
                     else
                     {
-                        oSession["x-replywithfile"] = "form.html";
+                        ResponseLogRequest(oSession, "404 Not Found","text/plain","");
                     }
                 }
             }
