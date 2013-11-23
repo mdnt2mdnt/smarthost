@@ -35,7 +35,9 @@ form .input{ width: 90% !important; }
     <input type="submit" value="Submit">
 </fieldset>
 </form>
-<div>Copyright by mooringniu@gmail.com</div>
+<p style="font-weight:normal">
+    After submit, your remote Proxy will be not use if it was configed before.
+</p>
 <script type="text/javascript">
 var sLocal = 'localStorage' in window,
     remoteConfig = {};
@@ -195,10 +197,9 @@ function getCookie(key){
 }
 function set(key,val,expr){
     if(sLocal){
-        if(expr<0){
-            localStorage.removeItem(oid+key);
-        }else{
-            localStorage.setItem(oid+key,val);
+        try{localStorage.removeItem(oid+key);}catch(e){}
+        if(expr>0){
+            try{localStorage.setItem(oid+key,val);}catch(e){}
         }
     }else{
         setCookie(key,val,expr);
