@@ -26,22 +26,30 @@ button{ width:90%; line-height:1.2em;font-size:1.2em;margin-bottom:0.6em;}
 <h1>Done</h1>
 <hr/>
 <span id="remoteProxy"></span>
-请打开你机器上的Fiddler,并设置允许远程链接,开始查看请求包吧.
+Open Fiddler At Your Computer, See the requestes;
 <span holder></span>
 <button onclick="goBack();return false;" href="javascript:void(0);">GO BACK</button>
 <script type="text/javascript">
-var sLocal = 'localStorage' in window;
+var sLocal = ('localStorage' in window);
 function goBack(){
     location.href = '/remote.html'+location.search;
 }
 (function(){
-   if(sLocal){
-        var ip = localStorage.getItem('remoteProxy');
-        if(ip){
-            document.getElementById('remoteProxy').innerHTML = '远程代理:'+ip;
+    var ip = localStorage.getItem('remoteProxy');
+    if(!ip){
+        var cookie = document.cookie.split('; ');
+        for(var i=0,il=cookie.length;i<il;i++){
+            var tmp = cookie[i].split('=');
+            if(tmp.length==2&&tmp[0]=='remoteProxy'){
+                ip = decodeURIComponent(tmp[1]);
+                break;
+            }
         }
+    }
+    if(ip){
+        document.getElementById('remoteProxy').innerHTML = 'Remote Proxy is set to '+ip+'.';
     }else{
-        document.getElementById('remoteProxy').innerHTML = '远程代理设置完毕';
+        document.getElementById('remoteProxy').innerHTML = 'Remote Proxy is set.';
     }
 })();
 </script>
