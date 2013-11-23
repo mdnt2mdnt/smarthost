@@ -1,5 +1,7 @@
 /*
  * Copyright by mooringniu@gmail.com ,Any Suggestion Contact me by email
+ * author : mooring 
+ * date   : 11/23/2013
  */
 using System;
 using System.Management;
@@ -56,12 +58,16 @@ public class SmartHost : IAutoTamper
         this.usrConfig   = new Dictionary<string, string>();
         this._tamperHost = FiddlerApplication.Prefs.GetBoolPref("extensions.smarthost.enabled", false);
         this._notifySrv  = FiddlerApplication.Prefs.GetStringPref("extensions.smarthost.setip", "");
-        if (this._notifySrv.Length>0 && this._notifySrv.StartsWith("http:"))
-        {
+        if (this._notifySrv.Length>0 && this._notifySrv.StartsWith("http:",StringComparison.OrdinalIgnoreCase)) {
+            //NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(this.networkAvailabilityChangeHandler);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(this.networdAddressChangeHandler);
         }
     }
     private void networdAddressChangeHandler(object sender, EventArgs e)
+    {
+        this.reportAdapterAddress();
+    }
+    private void networkAvailabilityChangeHandler(object sender, NetworkAvailabilityEventArgs e)
     {
         this.reportAdapterAddress();
     }
@@ -122,7 +128,7 @@ public class SmartHost : IAutoTamper
         if (File.Exists(argPath)){
             Fiddler.Utilities.RunExecutable("notepad.exe", "\"" + argPath + "\"");
         }else{
-            FiddlerApplication.Log.LogString("Readme.txt not found at the Scripts folder,Please Reinstall SmartHost Plugin.");
+            this.printJSLog("Readme.txt not found at the Scripts folder,Please Reinstall SmartHost Plugin.");
         }
     }
     [CodeDescription("About menuItem clicked Event Handler")]
@@ -147,25 +153,17 @@ public class SmartHost : IAutoTamper
     [CodeDescription("set WireLess & LanIP for future Use")]
     public void getAdapterAddress()
     {
-        foreach(NetworkInterface NI in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if(NI.NetworkInterfaceType==NetworkInterfaceType.Wireless80211)
-            {
-                foreach(UnicastIPAddressInformation IP in NI.GetIPProperties().UnicastAddresses)
-                {
-                    if (IP.Address.AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork && IP.IsDnsEligible)
-                    {
+        foreach(NetworkInterface NI in NetworkInterface.GetAllNetworkInterfaces()) {
+            if(NI.NetworkInterfaceType==NetworkInterfaceType.Wireless80211) {
+                foreach(UnicastIPAddressInformation IP in NI.GetIPProperties().UnicastAddresses) {
+                    if (IP.Address.AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork && IP.IsDnsEligible && !NI.Description.Contains("Virtual")) {
                         this._wifiIP = IP.Address.ToString();
                         break;
                     }
                 }
-            }
-            else if(NI.NetworkInterfaceType==NetworkInterfaceType.Ethernet)
-            {
-                foreach(UnicastIPAddressInformation IP in NI.GetIPProperties().UnicastAddresses)
-                {
-                    if (IP.Address.AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork && IP.IsDnsEligible)
-                    {
+            } else if(NI.NetworkInterfaceType==NetworkInterfaceType.Ethernet) {
+                foreach(UnicastIPAddressInformation IP in NI.GetIPProperties().UnicastAddresses) {
+                    if (IP.Address.AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork && IP.IsDnsEligible && !NI.Description.Contains("Virtual")) {
                         this._lanIP = IP.Address.ToString();
                         break;
                     }
@@ -178,7 +176,7 @@ public class SmartHost : IAutoTamper
     public void reportAdapterAddress()
     {
         this.getAdapterAddress();
-        if (!this._notifySrv.StartsWith("http://")) { return; }
+        if (!this._notifySrv.StartsWith("http://",StringComparison.OrdinalIgnoreCase)) { return; }
         string concat = this._notifySrv.Contains("?") ? "&" : "?",
                url = this._notifySrv + concat + "_" + (this._wifiIP.Length>0?"&wanip="+this._wifiIP:"") + (this._lanIP.Length>0?"&lanip="+this._lanIP:"");
         HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
@@ -189,16 +187,18 @@ public class SmartHost : IAutoTamper
         }
         httpWebRequest.UserAgent = "SmartHost/1.1.0.0";
         httpWebRequest.Referer = "http://smart.host/";
-        HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-        httpWebResponse.Close();
+        try{
+            HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            httpWebResponse.Close();
+        }catch(Exception e){}
         this.printJSLog(url+"\n");
     }
-    [CodeDescription("Return Wireless and Lan IP address")]
+    [CodeDescription("Print Wireless and Lan IP address")]
     private void logAdapterAddress(Session oSession)
     {
         this.responseLogRequest( oSession, "Wireless Proxy:" + this._wifiIP + "\nLanIP Address:" + this._lanIP + "\n", "text/plain", "");
     }
-    [CodeDescription("set plugin path from registry")]
+    [CodeDescription("get smarthost install folder from registry")]
     private void getPluginPath()
     {
         string path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
@@ -218,26 +218,21 @@ public class SmartHost : IAutoTamper
     {
         Dictionary<string, string> pQuery = this.splitString(postStr, new char[] { '&' }, new char[] { '=' });
         bool isRemote = false;
-        foreach (string key in pQuery.Keys)
-        {
+        foreach (string key in pQuery.Keys) {
             if (key == "remoteProxy") {
                 if (pQuery[key].Length == 0) {
                     this.usrConfig.Remove(cIP + "|remoteProxy");
                 } else {
                     isRemote = true;
                     pQuery[key] = pQuery[key].Replace("%3A", ":");
-                    this.printJSLog(cIP + " remoteProxy Setting To: " + pQuery[key]);
+                    this.printJSLog(cIP + "All HTTP Requests from "+cIP+" will be Sent to To: " + pQuery[key]);
                     this.usrConfig[cIP + "|remoteProxy"] = pQuery[key];
                 }
                 continue;
-            }
-            else if (key == "oid" && pQuery[key].Length > 0 && pQuery[key] != "Smarthost_")
-            {
+            } else if (key == "oid" && pQuery[key].Length > 0 && !pQuery[key].Contains("Smarthost_")) {
                 this.saveConfig2File(postStr, pQuery[key]);
                 continue;
-            }
-            else
-            {
+            } else {
                 if (pQuery[key].Length == 0) {
                     this.usrConfig.Remove(cIP + "|" + pQuery[key]);
                 } else {
@@ -247,15 +242,15 @@ public class SmartHost : IAutoTamper
         }
         return isRemote;
     }
-    [CodeDescription("save Config File To String")]
+    [CodeDescription("save client Config To File")]
     private void saveConfig2File(string postStr, string oid)
     {
         oid = Regex.Replace(oid, "[^a-z0-9_\\-\\.]+", "");
         string file = this._pluginDir + @"\Captures\Responses\Configs\" + oid + ".txt";
-        System.IO.File.WriteAllText(file, postStr);
+        try{System.IO.File.WriteAllText(file, postStr);}catch(Exception e){}
     }
     [CodeDescription("save client configuration to userConfig")]
-    private void saveClientConfig(string cIP, Session oSession)
+    private void updateClientConfig(string cIP, Session oSession)
     {
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
         bool ret = this.processClientConfig(postStr, cIP);
@@ -273,15 +268,11 @@ public class SmartHost : IAutoTamper
     private void tamperConfigedHost(string cIP, Session oSession)
     {
         string hostname = oSession.hostname;
-        if (this.usrConfig.ContainsKey(cIP + "|" + hostname))
-        {
-            if (this.usrConfig[cIP + "|" + hostname] == "" || this.usrConfig[cIP + "|" + hostname] == null || hostname == this._wifiIP || hostname == this._lanIP)
-            {
+        if (this.usrConfig.ContainsKey(cIP + "|" + hostname)) {
+            if (this.usrConfig[cIP + "|" + hostname] == "" || this.usrConfig[cIP + "|" + hostname] == null || hostname == this._wifiIP || hostname == this._lanIP) {
                 oSession.bypassGateway = false;
                 oSession["x-overrideHost"] = null;
-            }
-            else
-            {
+            } else {
                 oSession.bypassGateway = true;
                 oSession["x-overrideHost"] = this.usrConfig[cIP + "|" + hostname];
             }
@@ -294,7 +285,6 @@ public class SmartHost : IAutoTamper
         oSession.responseCode = statusCode;
         oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.0";
         oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
-
     }
     [CodeDescription("process Remote Log list Processing")]
     private void resopnseLogRequest(Session oSession)
@@ -317,18 +307,15 @@ public class SmartHost : IAutoTamper
         }
         pageSize = pageSize < 1 ? 100 : pageSize;
         id = id < 1 ? 1 : id;
-        if (gQuery.ContainsKey("saz") && gQuery["saz"].Length > 0)
-        {
+        if (gQuery.ContainsKey("saz") && gQuery["saz"].Length > 0) {
             this.downloadLogRequest(oSession, sLists, destIP, pageSize);
             return;
         }
-        if (destIP.Length > 0)
-        {
+        if (destIP.Length > 0) {
             int listLength = sLists.Length; ;
             string body = "[";
             for (int i = 0, j = 0; j < pageSize && i < listLength; i++) {
-                if (sLists[i].id < id || sLists[i].state < SessionStates.Done || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler))
-                {
+                if (sLists[i].id < id || sLists[i].state < SessionStates.Done || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)) {
                     continue;
                 }
                 if (sLists[i].m_clientIP == destIP || sLists[i].clientIP == destIP) {
@@ -338,9 +325,7 @@ public class SmartHost : IAutoTamper
             }
             body += "]";
             this.responseLogRequest(oSession, body, "application/javascript", callback);
-        }
-        else
-        {
+        } else {
             oSession.bypassGateway = true;
             oSession["x-replywithfile"] = "help.txt";
         }
@@ -394,11 +379,9 @@ public class SmartHost : IAutoTamper
     {
         Dictionary<string, string> obj = new Dictionary<string, string>();
         string[] pairs1 = strIn.Split(split1);
-        for (int i = 0, il = pairs1.Length; i < il; i++)
-        {
+        for (int i = 0, il = pairs1.Length; i < il; i++) {
             string[] pairs2 = pairs1[i].Split(split2);
-            if (pairs2.Length == 2 && pairs2[0].Length > 0)
-            {
+            if (pairs2.Length == 2 && pairs2[0].Length > 0) {
                 try{ pairs2[1] = Utilities.UrlDecode(pairs2[1]); }catch(Exception e){};
                 if (obj.ContainsKey(pairs2[0])){
                     obj[pairs2[0]] = pairs2[1];
@@ -412,15 +395,12 @@ public class SmartHost : IAutoTamper
     private string strItem(Session oSession)
     {
         string info = "", reqHead = "", reqBody = "", resHead = "", timer = "";
-        if (oSession.state == SessionStates.Done)
-        {
+        if (oSession.state == SessionStates.Done) {
             reqHead = Regex.Replace(oSession.oRequest.headers.ToString(), "[\r\n]+", @"\n");
             reqHead = Regex.Replace(reqHead, "\"", @"\u0022");
             resHead = Regex.Replace(oSession.oResponse.headers.ToString(), "[\r\n]+", @"\n");
             resHead = Regex.Replace(resHead, "\"", @"\u0022");
-
-            if (oSession.requestBodyBytes.Length > 0)
-            {
+            if (oSession.requestBodyBytes.Length > 0) {
                 reqBody = oSession.GetRequestBodyAsString();
                 reqBody = reqBody != "" ? Regex.Replace(reqBody, "[\r\n]+", @"\n") : "";
                 reqBody = !String.IsNullOrEmpty(reqBody) ? Regex.Replace(reqBody, "\"", @"\u0022") : "";
@@ -450,8 +430,7 @@ public class SmartHost : IAutoTamper
         string hostname = oSession.hostname;
         string host = oSession.host.Split(new char[] { ':' })[0];
         bool isConfig = oSession.HostnameIs("smart.host") || oSession.HostnameIs("config.qq.com");
-        if (!isConfig && this.usrConfig.ContainsKey(cIP + "|remoteProxy") && this.usrConfig[cIP + "|remoteProxy"].Length > 10)
-        {
+        if (!isConfig && this.usrConfig.ContainsKey(cIP + "|remoteProxy") && this.usrConfig[cIP + "|remoteProxy"].Length > 10) {
             oSession.bypassGateway = true;
             oSession["x-overrideHost"] = this.usrConfig[cIP + "|remoteProxy"];
             oSession.oRequest.headers["clientIP"] = cIP;
@@ -461,38 +440,27 @@ public class SmartHost : IAutoTamper
             this.tamperConfigedHost(cIP, oSession);
             return;
         }
-        if (isConfig&&oSession.HTTPMethodIs("GET"))
-        {
+        if (isConfig&&oSession.HTTPMethodIs("GET")) {
             string pathName = oSession.PathAndQuery.Substring(1).Split(new char[]{'?'})[0];
             string replyFile = pathName == "" ? "form.html" : pathName.Replace('/', '\\');
-            //如果文件存在
-            if (File.Exists(this._pluginDir + @"\Captures\Responses\" + replyFile))
-            {
+            if (File.Exists(this._pluginDir + @"\Captures\Responses\" + replyFile)) {
                 oSession["x-replywithfile"] = replyFile;
-            }
-            else
-            {
-                if (oSession.url.Contains("/log/"))
-                {
+            } else {
+                if (oSession.url.Contains("/log/")) {
                     this.resopnseLogRequest(oSession);
-                }
-                else if (oSession.url.Contains("/ip/"))
-                {
+                } else if (oSession.url.Contains("/ip/")) {
                     this.logAdapterAddress(oSession);
-                }
-                else
-                {
+                } else {
                     this.noBodyReponse(oSession,404);
                 }
             }
             return;
         }
         if (isConfig && oSession.HTTPMethodIs("POST")) {
-            this.saveClientConfig(cIP, oSession);
+            this.updateClientConfig(cIP, oSession);
             return;
         }
-        if (oSession.oRequest.headers["User-Agent"].Contains("Mac OS X") && (oSession.HostnameIs("www.airport.us") || oSession.HostnameIs("www.thinkdifferent.us") || oSession.HostnameIs("www.itools.info")))
-        {
+        if (oSession.oRequest.headers["User-Agent"].Contains("Mac OS X") && (oSession.HostnameIs("www.airport.us") || oSession.HostnameIs("www.thinkdifferent.us") || oSession.HostnameIs("www.itools.info"))) {
             this.responseLogRequest(oSession, "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>", "text/html", "");
         }
     }
@@ -516,6 +484,5 @@ public class SmartHost : IAutoTamper
     {
         FiddlerApplication.Prefs.SetBoolPref("extensions.smarthost.enabled", this._tamperHost);
     }
-
     public void OnBeforeReturningError(Session oSession) {  }
 }
