@@ -224,14 +224,11 @@ public class SmartHost : IAutoTamper
                     this.usrConfig.Remove(cIP + "|remoteProxy");
                 } else {
                     isRemote = true;
-                    pQuery[key] = pQuery[key].Replace("%3A", ":");
-                    this.printJSLog(cIP + "All HTTP Requests from "+cIP+" will be Sent to To: " + pQuery[key]);
-                    this.usrConfig[cIP + "|remoteProxy"] = pQuery[key];
+                    this.usrConfig[cIP+"|remoteProxy"] = pQuery[key];
+                    this.printJSLog("All HTTP Requests from "+cIP+" will be Sent to To: "+pQuery[key]);
                 }
-                continue;
             } else if (key == "oid" && pQuery[key].Length > 0 && !pQuery[key].Contains("Smarthost_")) {
                 this.saveConfig2File(postStr, pQuery[key]);
-                continue;
             } else {
                 if (pQuery[key].Length == 0) {
                     this.usrConfig.Remove(cIP + "|" + pQuery[key]);
