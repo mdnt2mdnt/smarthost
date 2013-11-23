@@ -80,7 +80,9 @@ function saveData(){
 if(sLocal){
     var proxy = localStorage.getItem('remoteProxy'),
         mode = localStorage.getItem('mode');
-    
+    try{ localStorage.setItem('test_test','tests'); }
+    catch(e){localStorage.clear();}
+    localStorage.remoteItem('test_test');
     if(!proxy){
         var cookies = document.cookie.split('; ');
         for(var i=0,il=cookies.length;i<il;i++){

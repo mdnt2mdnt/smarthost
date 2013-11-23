@@ -233,6 +233,11 @@ function loadRemoteConfig(oid,cbk){
     }
     xhr.send(null);
 }
+if('localStorage' in window){
+    try{ localStorage.setItem('test_test','tests'); }
+    catch(e){localStorage.clear();}
+    localStorage.remoteItem('test_test');
+}
 (function(){
     var search = location.search.length>1?location.search.substr(1):'',
         gQuery = splitQueryString(search);
