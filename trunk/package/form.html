@@ -196,14 +196,12 @@ function getCookie(key){
     }
 }
 function set(key,val,expr){
-    if(sLocal){
-        try{localStorage.removeItem(oid+key);}catch(e){}
-        if(expr>0){
-            try{localStorage.setItem(oid+key,val);}catch(e){}
+    try{localStorage.removeItem(oid+key);}catch(e){}
+    if(expr>0){
+        try{localStorage.setItem(oid+key,val);}catch(e){
         }
-    }else{
-        setCookie(key,val,expr);
     }
+    setCookie(key,val,expr);
 }
 function get(key){
     if(key in remoteConfig){
