@@ -183,7 +183,10 @@ public class SmartHost : IAutoTamper
         this.getAdapterAddress();
         if (!this._notifySrv.StartsWith("http://",StringComparison.OrdinalIgnoreCase)) { return; }
         string concat = this._notifySrv.Contains("?") ? "&" : "?",
-               url = this._notifySrv + concat + "_" + (this._wifiIP.Length>0?"&wanip="+this._wifiIP:"") + (this._lanIP.Length>0?"&lanip="+this._lanIP:"");
+               url = this._notifySrv;
+        url += (this._wifiIP.Length>0?(url.Contains("?")?"&":"?")+"wanip="+this._wifiIP:"");
+        url += (this._lanIP.Length >0?(url.Contains("?")?"&":"?")+"lanip="+this._lanIP:"");
+        if(url.Length==this._notifySrv.Length){ return; }
         HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
         if(CONFIG.sGatewayUsername != null && CONFIG.sGatewayPassword != null){
             httpWebRequest.Proxy.Credentials = (ICredentials)new NetworkCredential(CONFIG.sGatewayUsername, CONFIG.sGatewayPassword);
