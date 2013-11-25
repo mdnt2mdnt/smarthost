@@ -68,7 +68,7 @@ function saveData(){
             return false;
         }
         remote.value = ip.value+':'+port.value;
-        localStorage.remoteItem('remoteProxy');
+        localStorage.removeItem('remoteProxy');
         try{localStorage.setItem('remoteProxy',remote.value);}catch(e){}
         try{document.cookie = 'remoteProxy='+encodeURIComponent(remote.value)+'; expires='+dt.toGMTString();}catch(e){}
     }
@@ -80,9 +80,9 @@ function saveData(){
 if(sLocal){
     var proxy = localStorage.getItem('remoteProxy'),
         mode = localStorage.getItem('mode');
-    try{ localStorage.setItem('test_test','tests'); }
+    try{localStorage.setItem('test_test','tests'); }
     catch(e){localStorage.clear();}
-    localStorage.remoteItem('test_test');
+    localStorage.removeItem('test_test');
     if(!proxy){
         var cookies = document.cookie.split('; ');
         for(var i=0,il=cookies.length;i<il;i++){
