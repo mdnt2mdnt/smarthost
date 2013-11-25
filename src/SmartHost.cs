@@ -164,8 +164,13 @@ public class SmartHost : IAutoTamper
             } else if(NI.NetworkInterfaceType==NetworkInterfaceType.Ethernet) {
                 foreach(UnicastIPAddressInformation IP in NI.GetIPProperties().UnicastAddresses) {
                     if (IP.Address.AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork && IP.IsDnsEligible && !NI.Description.Contains("Virtual")) {
-                        this._lanIP = IP.Address.ToString();
-                        break;
+                        //USB Wireless Network Adapter Will be Here
+                        if(NI.Description.Contains("Wireless") && NI.Description.Contains("802.11")){
+                            this._wifiIP = IP.Address.ToString();
+                        }else{
+                            this._lanIP = IP.Address.ToString();
+                            break;
+                        }
                     }
                 }
             }
