@@ -182,8 +182,7 @@ public class SmartHost : IAutoTamper
     {
         this.getAdapterAddress();
         if (!this._notifySrv.StartsWith("http://",StringComparison.OrdinalIgnoreCase)) { return; }
-        string concat = this._notifySrv.Contains("?") ? "&" : "?",
-               url = this._notifySrv;
+        string url = this._notifySrv;
         url += (this._wifiIP.Length>0?(url.Contains("?")?"&":"?")+"wanip="+this._wifiIP:"");
         url += (this._lanIP.Length >0?(url.Contains("?")?"&":"?")+"lanip="+this._lanIP:"");
         if(url.Length==this._notifySrv.Length){ return; }
