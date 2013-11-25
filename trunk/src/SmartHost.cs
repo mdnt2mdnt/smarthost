@@ -4,13 +4,11 @@
  * date   : 11/23/2013
  */
 using System;
-using System.Management;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Resources;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -118,7 +116,7 @@ public class SmartHost : IAutoTamper
         if (File.Exists(argPath)){
             Fiddler.Utilities.RunExecutable("mshta.exe", "\"" + argPath + "\"");
         }else{
-            this.printJSLog("hostEditor.hta not found at the Scripts folder,Please Reinstall SmartHost Plugin.");
+            this.printJSLog("hostEditor.hta not found at the Scripts folder,Please Reinstall SmartHost Plugin");
         }
     }
     [CodeDescription("Readme menuItem clicked Event Handler")]
@@ -128,7 +126,7 @@ public class SmartHost : IAutoTamper
         if (File.Exists(argPath)){
             Fiddler.Utilities.RunExecutable("notepad.exe", "\"" + argPath + "\"");
         }else{
-            this.printJSLog("Readme.txt not found at the Scripts folder,Please Reinstall SmartHost Plugin.");
+            this.printJSLog("Readme.txt not found at the Scripts folder,Please Reinstall SmartHost Plugin");
         }
     }
     [CodeDescription("About menuItem clicked Event Handler")]
@@ -148,7 +146,7 @@ public class SmartHost : IAutoTamper
     [CodeDescription("print jslog to fiddler for mobile debuging")]
     private void printJSLog(string log)
     {
-        FiddlerApplication.Log.LogString(log);
+        FiddlerApplication.Log.LogFormat("SmartHost: {0}\n",new object[1]{(object) log});
     }
     [CodeDescription("set WireLess & LanIP for future Use")]
     public void getAdapterAddress()
@@ -175,7 +173,9 @@ public class SmartHost : IAutoTamper
                 }
             }
         }
-        this.printJSLog("\nNetwork Adapter Addresses : " + this._wifiIP + " " + this._lanIP + "\n");
+        if(this._wifiIP.Length>0 || this._lanIP.Length>0){
+            this.printJSLog("IP Address "+(this._wifiIP.Length>0?" WIFI:"+this._wifiIP:"")+(this._lanIP.Length>0?"\tEthernet:"+this._lanIP:""));
+        }
     }
     [CodeDescription("send IP Config for other programs")]
     public void reportAdapterAddress()
@@ -198,7 +198,7 @@ public class SmartHost : IAutoTamper
             HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
             httpWebResponse.Close();
         }catch(Exception e){}
-        this.printJSLog(url+"\n");
+        this.printJSLog(url);
     }
     [CodeDescription("Print Wireless and Lan IP address")]
     private void logAdapterAddress(Session oSession)
@@ -263,7 +263,7 @@ public class SmartHost : IAutoTamper
         } else {
             oSession["x-replywithfile"] = "done.html";
             if (this.usrConfig.ContainsKey(cIP + "|remoteProxy")) {
-                this.printJSLog(cIP + " remoteProxy " + this.usrConfig[cIP + "|remoteProxy"] + " removed ");
+                this.printJSLog(cIP + " remoteProxy " + this.usrConfig[cIP + "|remoteProxy"] + " removed");
                 this.usrConfig.Remove(cIP + "|remoteProxy");
             }
         }
