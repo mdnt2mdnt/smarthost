@@ -199,8 +199,7 @@ function getCookie(key){
 function set(key,val,expr){
     try{localStorage.removeItem(oid+key);}catch(e){}
     if(expr>0){
-        try{localStorage.setItem(oid+key,val);}catch(e){
-        }
+        try{localStorage.setItem(oid+key,val);}catch(e){ }
     }
     setCookie(key,val,expr);
 }
@@ -237,7 +236,7 @@ function loadRemoteConfig(oid,cbk){
 if('localStorage' in window){
     try{ localStorage.setItem('test_test','tests'); }
     catch(e){localStorage.clear();}
-    localStorage.remoteItem('test_test');
+    localStorage.removeItem('test_test');
 }
 (function(){
     var search = location.search.length>1?location.search.substr(1):'',
@@ -258,6 +257,7 @@ if('localStorage' in window){
             addBtn = document.getElementById('addBtnOne');
             restoreData();
         });
+        document.getElementById('oidInput').value = oid;
     }
 })();
 </script>
