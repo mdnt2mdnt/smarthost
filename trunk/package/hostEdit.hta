@@ -44,7 +44,7 @@ function getHostHtmlFromDom(){
 			ar.push('<option value="'+ck.attr('ip')+'"'+ (ck.attr('checked') ? ' selected' : '') + '>' + ck.attr('ip') + '</option>');
 			ar.domain = ck.attr('domain');
 		});
-        ar.unshift('<option value=""'+(noSel?' selected':'')+'>现网Host</option>');
+        ar.unshift('<option value=""'+(noSel?' selected':'')+'>IDC Host</option>');
         arHost.push('\t'+ar.domain+'<select name="'+ar.domain+'">\r\n\t\t'+ar.join('\r\n\t\t')+'\r\n\t</select>\r\n');
 	});
 	return arHost.join('');
@@ -194,7 +194,7 @@ function formatHostFile(){
 		});
 		arHText.push('#}\r\n');
 	});
-    
+
 	var fmtTxt = arHText.join('\r\n');
 	if (!setHostText(fmtTxt)) {
 		msg('save formated host failed，host maybe readonly! init error！');
@@ -249,9 +249,9 @@ function addOneRuleToGroup(fs, oRule, isUnique){
 		}
 	}
 	var id = 'chk_' + idIndex++;
-	var html = '<div title="' + (oRule.cmnt || '') + '"><label for="' + id + '" hidefocus="true" ' + 
-		(oRule.sharp ? '' : 'class="effective"') + '><input type="checkbox" id="' + id + '" ' + (oRule.sharp ? '' : 'checked') + 
-		' ip="' + oRule.ip + '" domain="' + oRule.domain + '" cmnt="' + oRule.cmnt + '"><span>' + oRule.ip + 
+	var html = '<div title="' + (oRule.cmnt || '') + '"><label for="' + id + '" hidefocus="true" ' +
+		(oRule.sharp ? '' : 'class="effective"') + '><input type="checkbox" id="' + id + '" ' + (oRule.sharp ? '' : 'checked') +
+		' ip="' + oRule.ip + '" domain="' + oRule.domain + '" cmnt="' + oRule.cmnt + '"><span>' + oRule.ip +
 		'</span>&nbsp;<a href="#" class="lnkcopy hidden" title="Copy" onclick="copyRule(this);return false;">C</a>'+
 		'<a href="#" class="lnkdelete hidden" title="Delete" onclick="delRule(this);return false;">X</a></label></div>';
 	if (!oRule.sharp) $(':checkbox[checked]', fs).attr({'checked': false}).parent().removeClass('effective');
@@ -316,7 +316,7 @@ function getHostPath(path){
 		path = null;
 		var text = '';
 		do {
-			if (path == null) 
+			if (path == null)
 				text = 'Can not find host file';
 			else if (text.empty()) {
 				text = 'Hosts can not be empty';
@@ -477,10 +477,10 @@ $(function(){
 		return false;
 	}
     window.onbeforeunload=function(){
-        if(isTextModeSaved){ 
+        if(isTextModeSaved){
             var text = $('#taHostText').val().trim();
             setTextToHost(text);
-        } else{ 
+        } else{
             saveDomToHost("update Silent on closed", true);
         }
     };
