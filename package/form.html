@@ -255,10 +255,10 @@ if('localStorage' in window){
     if('oid' in gQuery){
         oid = gQuery.oid;
     }else{
-        oid = 'smarthost_';
+        oid = 'Smarthost_';
     }
     oid = oid.replace(/[^a-z0-9\_\-\.]+/gi,'').substr(0,30);
-    if(oid != 'smarthost_'){
+    if(oid != 'Smarthost_'){
         loadRemoteConfig(oid,function(){
             document.getElementById('oidInput').value = oid;
             document.forms[0].action = 'done.html?'+search;
