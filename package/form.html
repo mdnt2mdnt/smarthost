@@ -88,6 +88,7 @@ function saveData(){
         key = ''; val = '';item='';
     }
     saveItems(localData);
+    set('mode','local',7,true);
     return true;
 }
 function saveItems(localData){
@@ -109,12 +110,12 @@ function restoreData(){
         span = document.getElementsByTagName('span')[0],
         domainStr = get('domains')||'',
         domains = domainStr.split('|'),
-        sNames = {},
+        sNames = {}, rNames = [],
         inputS = [];
     for(var i=0,il=ipts.length;i<il;i++){
         var item = ipts[i];
-        if(domainStr.indexOf(item.name) != -1){
-            var val = get(item.name);
+        if(domainStr.indexOf(item.name) != -1 || remoteConfig[item.name]){
+            var val = get(item.name) || remoteConfig[item.name];
             for(var j=0,jl=ipts[i].options.length;j<jl;j++){
                 if(ipts[i].options[j].value == val){
                     ipts[i].selectedIndex = j;
@@ -123,17 +124,26 @@ function restoreData(){
             }
         }
         if(item.name){ sNames[item.name] = true; }
-    } 
+    }
+    for(var i in remoteConfig){
+        if(!(sNames[i]) && i != 'oid'){
+            if(remoteConfig[i].length){
+                domains.push(i);
+            }else{
+                inputS.push(i);
+            }
+        }
+    }
     for(var j=0,jl=domains.length;j<jl;j++){
         var key = domains[j],
-            val = get(key);
+            val = get(key) || remoteConfig[key];
         if(key in sNames){ continue; }
         if(val && val.length){
             var t = document.createTextNode(key),
                 s = document.createElement('select');
             s.name = key;
             s.isLocal = true;
-            s.options[0] = new Option('ÏÖÍøHost','');
+            s.options[0] = new Option('IDC HOST','');
             s.options[0].comment = "IDC HOST";
             s.options[1] = new Option(val, val);
             frag.appendChild(t);
@@ -196,7 +206,8 @@ function getCookie(key){
         }
     }
 }
-function set(key,val,expr){
+function set(key,val,expr,nooid){
+    if(nooid){oid='';}
     try{localStorage.removeItem(oid+key);}catch(e){}
     if(expr>0){
         try{localStorage.setItem(oid+key,val);}catch(e){ }

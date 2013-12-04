@@ -1,7 +1,7 @@
 /*
  * Copyright by mooringniu@gmail.com ,Any Suggestion Contact me by email
- * author : mooring 
- * date   : 11/23/2013
+ * Author : mooring
+ * Date   : 12/04/2013
  */
 using System;
 using System.Collections;
@@ -23,8 +23,8 @@ using Fiddler;
 [assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2013")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
-[assembly: AssemblyVersion("1.1.0.1")]
-[assembly: AssemblyFileVersion("1.1.0.1")]
+[assembly: AssemblyVersion("1.1.0.2")]
+[assembly: AssemblyFileVersion("1.1.0.2")]
 [assembly: Fiddler.RequiredVersion("2.4.1.1")]
 
 public class SmartHost : IAutoTamper
@@ -134,10 +134,10 @@ public class SmartHost : IAutoTamper
     {
         MessageBox.Show(
             "Smarthost For Fiddler\n--------------------------------------------------"
-            + "\nA Remote IP/HOST Remaping Tool For Fiddler"
-            + "\nMaking Mobile Development More Easier.\n"
-            + "\nFileVersion: 1.1.0.1\n"
-            + "\nAny Suggestion Concat mooringniu@gmail.com",
+            + "\nA remote IP/Host remap extension for Fiddler"
+            + "\nMaking mobile developming More Easier.\n"
+            + "\nFileVersion: 1.1.0.2\n"
+            + "\nAny suggestion contact mooringniu@gmail.com",
             "About SmartHost",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information
@@ -192,7 +192,7 @@ public class SmartHost : IAutoTamper
         }else{
             httpWebRequest.Proxy.Credentials = CredentialCache.DefaultCredentials;
         }
-        httpWebRequest.UserAgent = "SmartHost/1.1.0.1";
+        httpWebRequest.UserAgent = "SmartHost/1.1.0.2";
         httpWebRequest.Referer = "http://smart.host/";
         try{
             HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
@@ -227,12 +227,18 @@ public class SmartHost : IAutoTamper
         bool isRemote = false;
         foreach (string key in pQuery.Keys) {
             if (key == "remoteProxy") {
-                if (pQuery[key].Length == 0) {
-                    this.usrConfig.Remove(cIP + "|remoteProxy");
-                } else {
-                    isRemote = true;
+                List<string> keys = new List<string>(this.usrConfig.Keys);
+                foreach(string ipHost in keys){
+                    if(ipHost.StartsWith(cIP+"|",StringComparison.OrdinalIgnoreCase)){
+                        try{this.usrConfig.Remove(ipHost);}catch(Exception e){}
+                    }
+                }
+                isRemote = true;
+                if (pQuery[key].Length > 0) {
                     this.usrConfig[cIP+"|remoteProxy"] = pQuery[key];
-                    this.printJSLog("All HTTP Requests from "+cIP+" will be Sent to To: "+pQuery[key]);
+                    this.printJSLog("All HTTP Requests from "+cIP+" will be Sent to To: "+pQuery[key]+".");
+                }else{
+                    this.printJSLog("All IP/Host map Configuration of "+cIP+" has been cleaned.");
                 }
             } else if (key == "oid" && pQuery[key].Length > 0 && !pQuery[key].Contains("Smarthost_")) {
                 this.saveConfig2File(postStr, pQuery[key]);
@@ -287,7 +293,7 @@ public class SmartHost : IAutoTamper
         oSession.utilCreateResponseAndBypassServer();
         oSession.bypassGateway = true;
         oSession.responseCode = statusCode;
-        oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.1";
+        oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.2";
         oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
     }
     [CodeDescription("process Remote Log list Processing")]
