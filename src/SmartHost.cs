@@ -149,7 +149,7 @@ public class SmartHost : IAutoTamper
         FiddlerApplication.Log.LogFormat("SmartHost: {0}\n",new object[1]{(object) log});
     }
     [CodeDescription("set WireLess & LanIP for future Use")]
-    public void getAdapterAddress()
+    private void getAdapterAddress()
     {
         foreach(NetworkInterface NI in NetworkInterface.GetAllNetworkInterfaces()) {
             if(NI.NetworkInterfaceType==NetworkInterfaceType.Wireless80211) {
@@ -178,7 +178,7 @@ public class SmartHost : IAutoTamper
         }
     }
     [CodeDescription("send IP Config for other programs")]
-    public void reportAdapterAddress()
+    private void reportAdapterAddress()
     {
         this.getAdapterAddress();
         if (!this._notifySrv.StartsWith("http://",StringComparison.OrdinalIgnoreCase)) { return; }
