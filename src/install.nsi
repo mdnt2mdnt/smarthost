@@ -64,6 +64,7 @@ Section SmartHost
     File             "/oname=$OUTDIR\Captures\Responses\done.html"      ..\package\done.html
     File             "/oname=$OUTDIR\Captures\Responses\rdone.html"     ..\package\rdone.html
     File             "/oname=$OUTDIR\Captures\Responses\blank.gif"      ..\package\blank.gif
+    File             "/oname=$OUTDIR\Captures\Responses\share.js"      ..\package\share.js
     File             "/oname=$OUTDIR\Captures\Responses\favicon.ico"    ..\package\favicon.ico
     File             "/oname=$OUTDIR\Scripts\Smarthost\smarthost.ico"   ..\package\favicon.ico
     File             "/oname=$OUTDIR\Scripts\Smarthost\hostEditor.hta"  ..\package\hostEdit.hta
@@ -97,6 +98,7 @@ Section Uninstall
     Delete        "$OUTDIR\Captures\Responses\help.txt"
     Delete        "$OUTDIR\Captures\Responses\done.html"
     Delete        "$OUTDIR\Captures\Responses\rdone.html"
+    Delete        "$OUTDIR\Captures\Responses\share.js"
     Delete        "$OUTDIR\Captures\Responses\remote.html"
     Delete        "$OUTDIR\Captures\Responses\favicon.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\smarthost.ico"
