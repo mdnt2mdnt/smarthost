@@ -3,9 +3,9 @@ var shareData = {
 	img_width : '640',
 	img_height : '640',
 	link : 'http://smarthost.sinaapp.com/help.php?id=1',
-	desc : '???????',
+	desc : '手机端开发利器',
 	title : 'SmartHost',
-	content : '#SmartHost#???????',
+	content : '#SmartHost#手机端开发利器',
 	url : 'http://smarthost.sinaapp.com/help.php?id=1'
 };
 function shareFriend() {
