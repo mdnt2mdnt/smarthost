@@ -35,7 +35,7 @@ function shareTimeline() {
 }
 function shareWeibo() {
 	WeixinJSBridge.invoke("shareWeibo", {
-		content : shareData.content,
+		content : shareData.content + shareData.url,
 		url : shareData.url || ' '
 	}, function (a) {});
 }
