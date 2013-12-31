@@ -3,7 +3,7 @@
 *An IP/Domain Remap Extension for Fiddler*
 
 [https://smarthost.googlecode.com/files/follow-chat_en.png]
-[https://smarthost.googlecode.com/files/network.png]
+[https://smarthost.googlecode.com/files/network.png?111]
 
 
 *Introduction*
