@@ -23,8 +23,8 @@ using Fiddler;
 [assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2013")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
-[assembly: AssemblyVersion("1.1.0.2")]
-[assembly: AssemblyFileVersion("1.1.0.2")]
+[assembly: AssemblyVersion("1.1.0.3")]
+[assembly: AssemblyFileVersion("1.1.0.3")]
 [assembly: Fiddler.RequiredVersion("2.4.1.1")]
 
 public class SmartHost : IAutoTamper
@@ -136,7 +136,7 @@ public class SmartHost : IAutoTamper
             "Smarthost For Fiddler\n--------------------------------------------------"
             + "\nA remote IP/Host remap extension for Fiddler"
             + "\nMaking mobile developming More Easier.\n"
-            + "\nFileVersion: 1.1.0.2\n"
+            + "\nFileVersion: 1.1.0.3\n"
             + "\nAny suggestion contact mooringniu@gmail.com",
             "About SmartHost",
             MessageBoxButtons.OK,
@@ -192,7 +192,7 @@ public class SmartHost : IAutoTamper
         }else{
             httpWebRequest.Proxy.Credentials = CredentialCache.DefaultCredentials;
         }
-        httpWebRequest.UserAgent = "SmartHost/1.1.0.2";
+        httpWebRequest.UserAgent = "SmartHost/1.1.0.3";
         httpWebRequest.Referer = "http://smart.host/";
         try{
             HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
@@ -293,7 +293,7 @@ public class SmartHost : IAutoTamper
         oSession.utilCreateResponseAndBypassServer();
         oSession.bypassGateway = true;
         oSession.responseCode = statusCode;
-        oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.2";
+        oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.3";
         oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
     }
     [CodeDescription("process Remote Log list Processing")]
@@ -435,12 +435,12 @@ public class SmartHost : IAutoTamper
     [CodeDescription("Berfore Request Tamper.")]
     public void AutoTamperRequestBefore(Session oSession)
     {
-        if (!this._tamperHost) { return; }
+        if (!this._tamperHost || oSession.isTunnel || oSession.isHTTPS || oSession.isFTP ) { return; }
         string cIP = !String.IsNullOrEmpty(oSession.m_clientIP) ? oSession.m_clientIP : oSession.clientIP;
         string hostname = oSession.hostname;
         string host = oSession.host.Split(new char[] { ':' })[0];
         bool isConfig = oSession.HostnameIs("smart.host") || oSession.HostnameIs("config.qq.com");
-        if (!isConfig && this.usrConfig.ContainsKey(cIP + "|remoteProxy") && this.usrConfig[cIP + "|remoteProxy"].Length > 10) {
+        if (!isConfig  && this.usrConfig.ContainsKey(cIP + "|remoteProxy") && this.usrConfig[cIP + "|remoteProxy"].Length > 10) {
             oSession.bypassGateway = true;
             oSession["x-overrideHost"] = this.usrConfig[cIP + "|remoteProxy"];
             oSession.oRequest.headers["clientIP"] = cIP;
