@@ -1,5 +1,5 @@
 #labels Featured,Phase-QA
-= Fiddler抓包示意图 =
+= 关于Smarthost =
 
 [https://smarthost.googlecode.com/files/Smarthost.png]
 [https://smarthost.googlecode.com/files/follow-chat.png]
