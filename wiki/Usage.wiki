@@ -1,9 +1,11 @@
+#labels Featured,Phase-QA
 =Smarthost=
 
 *An IP/Domain Remap Extension for Fiddler*
 
 [https://smarthost.googlecode.com/files/follow-chat_en.png]
-[https://smarthost.googlecode.com/files/network.png?111]
+[https://smarthost.googlecode.com/files/network0.png?1]
+[https://smarthost.googlecode.com/files/network1.png?1]
 
 
 *Introduction*
