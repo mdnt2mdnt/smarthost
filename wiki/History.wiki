@@ -14,4 +14,6 @@
   * 1.0.2.3
     #Remove Monitoring function
   * 1.0.2.4
-    # Fix http GET 502 error after post Config
+    # Fix HTTP GET 502 error after post Config
+  * 1.1.0.3
+    # Error Fixed on HTTPS Remote Model
