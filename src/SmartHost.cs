@@ -134,7 +134,7 @@ public class SmartHost : IAutoTamper
     {
         MessageBox.Show(
             "Smarthost For Fiddler\n--------------------------------------------------"
-            + "\nA remote IP/Host remap extension for Fiddler"
+            + "\nA Remote IP/Host REMAP Add-on for Fiddler"
             + "\nMaking mobile developming More Easier.\n"
             + "\nFileVersion: 1.1.0.3\n"
             + "\nAny suggestion contact mooringniu@gmail.com",
@@ -174,7 +174,7 @@ public class SmartHost : IAutoTamper
             }
         }
         if(this._wifiIP.Length>0 || this._lanIP.Length>0){
-            this.printJSLog("IP Address "+(this._wifiIP.Length>0?" WIFI:"+this._wifiIP:"")+(this._lanIP.Length>0?"\tEthernet:"+this._lanIP:""));
+            this.printJSLog("IP Address \t"+(this._wifiIP.Length>0?" WIFI:"+this._wifiIP:"")+(this._lanIP.Length>0?"\tEthernet:"+this._lanIP:""));
         }
     }
     [CodeDescription("send IP Config for other programs")]
@@ -236,7 +236,7 @@ public class SmartHost : IAutoTamper
                 isRemote = true;
                 if (pQuery[key].Length > 0) {
                     this.usrConfig[cIP+"|remoteProxy"] = pQuery[key];
-                    this.printJSLog("All HTTP Requests from "+cIP+" will be Sent to To: "+pQuery[key]+".");
+                    this.printJSLog("All HTTP Requests from "+cIP+" will be Sent to To: "+pQuery[key]+".\n");
                 }else{
                     this.printJSLog("All IP/Host map Configuration of "+cIP+" has been cleaned.");
                 }
@@ -296,50 +296,7 @@ public class SmartHost : IAutoTamper
         oSession.oResponse.headers["Server"] = "SmartHost/1.1.0.3";
         oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("r");
     }
-    [CodeDescription("process Remote Log list Processing")]
-    private void resopnseLogRequest(Session oSession)
-    {
-        Dictionary<string, string> gQuery = this.splitString(oSession.PathAndQuery.Substring(1), new char[] { '&','?'}, new char[] {'='});
-        Session[] sLists = FiddlerApplication.UI.GetAllSessions();
-        string destIP = "", callback = "";
-        Int32 id = 0, pageSize = 100;
-        if (gQuery.ContainsKey("ip")) {
-            destIP = Regex.Replace(gQuery["ip"], "[^\\d\\.]+", "");
-        }
-        if (gQuery.ContainsKey("callback")) {
-            callback = Regex.Replace(gQuery["callback"], "[^\\w\\d_\\$\\.]+", "");
-        }
-        if (gQuery.ContainsKey("size")) {
-            pageSize = Convert.ToInt32(gQuery["size"]);
-        }
-        if (gQuery.ContainsKey("id")) {
-            id = Convert.ToInt32(gQuery["id"]);
-        }
-        pageSize = pageSize < 1 ? 100 : pageSize;
-        id = id < 1 ? 1 : id;
-        if (gQuery.ContainsKey("saz") && gQuery["saz"].Length > 0) {
-            this.downloadLogRequest(oSession, sLists, destIP, pageSize);
-            return;
-        }
-        if (destIP.Length > 0) {
-            int listLength = sLists.Length; ;
-            string body = "[";
-            for (int i = 0, j = 0; j < pageSize && i < listLength; i++) {
-                if (sLists[i].id < id || sLists[i].state < SessionStates.Done || sLists[i].isFlagSet(SessionFlags.ResponseGeneratedByFiddler)) {
-                    continue;
-                }
-                if (sLists[i].m_clientIP == destIP || sLists[i].clientIP == destIP) {
-                    body += (j > 0 ? "," : "") + strItem(sLists[i]);
-                    j++;
-                }
-            }
-            body += "]";
-            this.responseLogRequest(oSession, body, "application/javascript", callback);
-        } else {
-            oSession.bypassGateway = true;
-            oSession["x-replywithfile"] = "help.txt";
-        }
-    }
+    
     [CodeDescription("set response header and send body")]
     private void responseLogRequest(Session oSession, string body, string type, string cb)
     {
@@ -456,9 +413,7 @@ public class SmartHost : IAutoTamper
             if (File.Exists(this._pluginDir + @"\Captures\Responses\" + replyFile)) {
                 oSession["x-replywithfile"] = replyFile;
             } else {
-                if (oSession.url.Contains("/log/")) {
-                    this.resopnseLogRequest(oSession);
-                } else if (oSession.url.Contains("/ip/")) {
+                if (oSession.url.Contains("/ip/")) {
                     this.logAdapterAddress(oSession);
                 } else {
                     this.noBodyReponse(oSession,404);
@@ -469,9 +424,6 @@ public class SmartHost : IAutoTamper
         if (isConfig && oSession.HTTPMethodIs("POST")) {
             this.updateClientConfig(cIP, oSession);
             return;
-        }
-        if (oSession.oRequest.headers["User-Agent"].Contains("Mac OS X") && (oSession.HostnameIs("www.airport.us") || oSession.HostnameIs("www.thinkdifferent.us") || oSession.HostnameIs("www.itools.info"))) {
-            this.responseLogRequest(oSession, "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>", "text/html", "");
         }
     }
     public void AutoTamperRequestAfter(Session oSession) { }
