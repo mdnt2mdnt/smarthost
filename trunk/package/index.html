@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="gb2312"/>
+<script type="text/javascript">var _speedMark = new Date();</script>
+<title>SmartHost</title>
+<meta name="author" content="mooringniu" />
+<meta name="url" content="http://code.google.com/p/smarthost" />
+<meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" type="text/css" href="mstyle.css" />
+</head>
+<body>
+<h2 class="center">SmartHost Configuration</h2>
+<form method="POST" action="http://smarthost.duapp.com/" id="selectForm" onsubmit="return checkForm()" enctype="application/x-www-form-urlencoded" >
+  <fieldset>
+    <label for="modelSelect">Model Select</label>
+    <select id="modelSelect" name="proxyModel">
+      <option value="remote">Romote Proxy</option>
+      <option value="local">Local IP/Host Pairs</option>
+    </select>
+  </fieldset>
+  <fieldset id="remoteContent">
+    <legend>Remote Proxy</legend>
+    <input type="text" id="remoteHost" placeholder="remote ip address 192.168.1.10" maxlength="15"/>
+    <input type="tel"   id="remotePort"  placeholder="port 8888" maxlength="5" />
+  </fieldset>
+  <fieldset id="localContent">
+    <legend>Local IP/Host Pairs</legend>
+    <span holder></span>
+    <div class="info">
+      <input class="input" type="text" key="val"  placeholder="local ip address" maxlength="15" />
+      <input class="input" type="text" key="key" placeholder="host www.qq.com" />
+      <input class="input" type="hidden" name=""/>
+    </div>
+    <button id="addBtnOne" class="green">Add Pairs</button>
+  </fieldset>
+  <input type="hidden" id="oidInput"/>
+  <button type="submit" class="blue">Submit</button>
+</form>
+<dl class="model_tips">
+  <dt>Romote Proxy</dt>
+  <dd>proxy all HTTP requests to specify ip:port</dd>
+  <dt>Local IP/Host Pairs</dt>
+  <dd>select ip/host pairs which have been configurated by proxy admin</dd>
+</dl>
+<div class="center">&copy; by mooringniu</div>
+<script type="text/javascript" src="appframework.min.js" charset="utf-8"></script> 
+<script type="text/javascript" src="comm.js" charset="utf-8"></script> 
+<script type="text/javascript" src="index.js" charset="utf-8"></script> 
+<script type="text/javascript" src="http://tajs.qq.com/stats?sId=28971616" charset="utf-8"></script>
+</body>
+</html>
