@@ -58,17 +58,15 @@ Section SmartHost
     CreateDirectory  $OUTDIR\Scripts\Smarthost
     File             "/oname=$OUTDIR\Scripts\Smarthost.dll"             ..\obj\Smarthost.dll
     File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"      ..\package\readme.txt
-    File             "/oname=$OUTDIR\Captures\Responses\form.html"      ..\package\form.html
+    File             "/oname=$OUTDIR\Captures\Responses\index.html"      ..\package\index.html
     File             "/oname=$OUTDIR\Captures\Responses\help.txt"       ..\package\help.txt
-    File             "/oname=$OUTDIR\Captures\Responses\remote.html"    ..\package\remote.html
     File             "/oname=$OUTDIR\Captures\Responses\done.html"      ..\package\done.html
     File             "/oname=$OUTDIR\Captures\Responses\rdone.html"     ..\package\rdone.html
     File             "/oname=$OUTDIR\Captures\Responses\blank.gif"      ..\package\blank.gif
     File             "/oname=$OUTDIR\Captures\Responses\mstyle.css"     ..\package\mstyle.css
     File			 "/oname=$OUTDIE\Captures\Responses\js\appframework.min.js" ..\package\appframework.min.js
     File			 "/oname=$OUTDIR\Captures\Responses\js\comm.js"		..\package\comm.js
-    File			 "/oname=$OUTDIR\Captures\Responses\js\form.js"		..\package\form.js
-    File			 "/oname=$OUTDIR\Captures\Responses\js\remote.js"	..\package\remote.js
+    File			 "/oname=$OUTDIR\Captures\Responses\js\index.js"	..\package\index.js
     File			 "/oname=$OUTDIR\Captures\Responses\js\done.js"		..\package\done.js
     File			 "/oname=$OUTDIR\Captures\Responses\js\rdone.js"	..\package\rdone.js
     File             "/oname=$OUTDIR\Captures\Responses\favicon.ico"    ..\package\favicon.ico
@@ -101,13 +99,14 @@ Section Uninstall
     Delete        "$OUTDIR\Scripts\Smarthost\README.txt"
     Delete        "$OUTDIR\Captures\Responses\blank.gif"
     Delete        "$OUTDIR\Captures\Responses\form.html"
+    Delete        "$OUTDIR\Captures\Responses\index.html"    
     Delete        "$OUTDIR\Captures\Responses\help.txt"
     Delete        "$OUTDIR\Captures\Responses\done.html"
     Delete        "$OUTDIR\Captures\Responses\rdone.html"
     Delete        "$OUTDIR\Captures\Responses\share.js"
     Delete        "$OUTDIR\Captures\Responses\js\appframework.min.js"
     Delete        "$OUTDIR\Captures\Responses\js\comm.js"
-    Delete        "$OUTDIR\Captures\Responses\js\form.js"
+    Delete        "$OUTDIR\Captures\Responses\js\index.js"
     Delete        "$OUTDIR\Captures\Responses\remote.html"
     Delete        "$OUTDIR\Captures\Responses\favicon.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\smarthost.ico"
