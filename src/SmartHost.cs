@@ -309,39 +309,6 @@ public class SmartHost : IAutoTamper
         oSession.oResponse.headers["Content-Length"] = "" + body.Length;
         oSession.utilSetResponseBody(body);
     }
-    [CodeDescription("download sessions as saz for remote use")]
-    private void downloadLogRequest(Session oSession, Session[] sLists, string destIP, Int32 pageSize)
-    {
-        if (sLists.Length < 1) {
-            this.responseLogRequest(oSession, "No Log for Your Request", "text/plain", "");
-            return;
-        }
-        int Count = 0;
-        for (int i = 0, il = sLists.Length; i < il; i++) {
-            if (sLists[i].oFlags["x-clientIP"] == destIP) {
-                Count++;
-            }
-        }
-        Session[] dLists = new Session[Count];
-        for (int i = 0, j = 0, il = sLists.Length; i < il; i++) {
-            if (j < Count && sLists[i].oFlags["x-clientIP"] == destIP) {
-                dLists[j++] = sLists[i];
-            }
-        }
-        string name = oSession.clientIP.Length > 0 ? oSession.clientIP : oSession.m_clientIP;
-        string file = this._pluginDir + @"\Captures\Responses\Packages\" + name + ".saz";
-        bool ret = false;
-        try { ret = Utilities.WriteSessionArchive(file, dLists, "", true); }
-        catch (Exception e) { }
-        if (ret) {
-            this.noBodyReponse(oSession,200);
-            oSession["x-replywithfile"] = @"Packages\"+ name + ".saz";
-            oSession.oResponse.headers["Content-Type"] = "application/x-fiddler-session-archive";
-            oSession.oResponse.headers["Content-Disposition"] = "attachment; filename="+name+".saz";
-        } else {
-            this.responseLogRequest(oSession, "Not Ready", "text/plain", "");
-        }
-    }
     private Dictionary<string, string> splitString(string strIn, char[] split1, char[] split2)
     {
         Dictionary<string, string> obj = new Dictionary<string, string>();
