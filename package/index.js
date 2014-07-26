@@ -74,7 +74,7 @@ function checkRemote(){
 }
 function updateUserConfig(){
 	if(gQuery.oid){
-		$('#oidInput').attr('name','oid').val(gQuery.oid);
+		$('#oidInput').prop('name','oid').val(gQuery.oid);
 	}
 	return true;
 }
@@ -94,7 +94,7 @@ function initEvents(){
 $(document).ready(function(){
 	if(gQuery.oid){
 		gQuery.oid = gQuery.oid.replace(/[^a-z0-9]+/gi,'');
-		$('#oidInput').attr('name',gQuery.oid);
+		$('#oidInput').prop('name','oid').val(gQuery.oid);
 		loadConfig();
 	}
 	initEvents();
