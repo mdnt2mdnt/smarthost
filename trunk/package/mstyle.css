@@ -35,6 +35,7 @@ button.green{
 .float button{margin-left:auto;margin-right:auto;;width:90%;}
 
 dl{text-align:justify;margin:0px;padding:0px;}
+dd{margin-left:1em;}
 .info{ border-bottom:1px dotted #ccc; padding-bottom:0.3em;margin-bottom:0.5em;}
 .copy{margin-bottom:5em;font-size:0.8em;color:#666;}
 #localContent div:last-child{border-bottom:none;margin-bottom:1em;}
