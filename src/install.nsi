@@ -55,6 +55,7 @@ Section SmartHost
     
     SetOutPath       "$DOCUMENTS\Fiddler2\"
     CreateDirectory  $OUTDIR\Captures\Responses
+    CreateDirectory  $OUTDIR\Captures\Responses\js
     CreateDirectory  $OUTDIR\Scripts\Smarthost
     File             "/oname=$OUTDIR\Scripts\Smarthost.dll"             ..\obj\Smarthost.dll
     File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"      ..\package\readme.txt
