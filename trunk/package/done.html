@@ -1,143 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
 <script type="text/javascript">var _speedMark = new Date();</script>
 <title>SmartHost</title>
-<meta charset="gb2312" />
-<meta http-equiv="content-type" content="text/html; charset=GB2312"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
 <meta name="author" content="mooringniu" />
 <meta name="url" content="http://code.google.com/p/smarthost" />
 <meta name="description" content="SmartHost A Remote IP/Host Remap Plugin for Fiddler" />
-<style type="text/css">
-body{
-    margin:0px;padding:0px;
-    line-height:1.6em;
-    font-size:1.3em;
-    font-weight:600;
-    text-align:center;
-    text-decoration:none;
-    max-width:device-width;min-width:320px;
-}
-h1{margin:0;}
-button{ width:90%; line-height:1.2em;font-size:1.2em;margin-bottom:0.6em;}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" type="text/css" href="mstyle.css" />
 </head>
 <body>
-<h1>Done</h1>
-<hr/>
-<a href="http://localhost/" target="_blank">localhost</a><br/>
-	<span holder></span>
-<button onclick="goBack();return false;" href="javascript:void(0);">GO BACK</button>
-<script type="text/javascript">
-var sLocal = 'localStorage' in window,
-    remoteConfig = {};
-function goBack(){
-    var opt = location.href.split('/')
-    location.href = '/form.html'+location.search;
-}
-function setData(){
-    var frag = document.createDocumentFragment(),
-        span = document.getElementsByTagName('span')[0],
-        a = document.getElementsByTagName('a'),
-        domains = get('domains')||'',
-        sNames = {};
-    domains = domains.split('|');
-    for(var i=0,il=domains.length;i<il;i++){
-        if(domains[i] in remoteConfig){
-            delete remoteConfig[domains[i]];
-        }
-    }
-    for(var i in remoteConfig){
-        if(i != 'oid' && i.length>3){
-            domains.push(i);
-        }
-    }
-    for(var i=0,il=a.length;i<il;i++){
-        if(a[i].href){
-            sNames[a[i].href] = true;
-        }
-    }
-    for(var i=0,il=domains.length;i<il;i++){
-        if(domains[i].length<3){ continue; }
-        var url = 'http://'+domains[i]+'/';
-        if(url in sNames){ continue; }
-        var s = document.createElement('a'),
-            b = document.createElement('br');
-        s.target="_blank";
-        s.href = url;
-        s.innerHTML = domains[i];
-        frag.appendChild(s);
-        frag.appendChild(b);
-    }
-    span.parentNode.insertBefore(frag,span);
-}
-function splitQueryString(str){
-    var strArr = str.split(/&+/gi),obj = {};
-    for(var i=0,il=strArr.length; i<il; i++){
-        var sp = strArr[i].split(/=+/gi);
-        if(sp.length==2){
-            obj[sp[0]] = sp[1];
-        }
-    }
-    return obj;
-}
-function getCookie(key){
-    var str = document.cookie,
-        cookies = str.split(/;\s*/gi),
-        ckObj = {};
-    key = oid+key;
-    for(var i =0,il=cookies.length; i<il; i++){
-        var t = cookies[i].split('=');
-        if(t[0] == key){
-            return t[1];
-        }
-    }
-}
-function get(key){
-    if(sLocal){
-        return localStorage.getItem(oid+key);
-    }else{
-        return getCookie(key);
-    }
-}
-function loadRemoteConfig(oid,cbk){
-    var xhr = new XMLHttpRequest();
-    if(!xhr){
-        xhr = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    if(!xhr){
-        if(cbk&&typeof(cbk)=='function'){cbk();};
-        return;
-    }
-    xhr.open('GET','/Configs/'+oid+'.txt',true);
-    xhr.onreadystatechange=function(){
-        if(xhr.readyState == 4){
-            if(xhr.status == 200){
-                remoteConfig = splitQueryString(xhr.responseText);
-            }
-            if(cbk && typeof(cbk)=='function'){ cbk(); }
-        }
-    }
-    xhr.send(null);
-}
-(function(){
-    var search = location.search.length>1?location.search.substr(1):'',
-        gQuery = splitQueryString(search);
-    if('oid' in gQuery){
-        oid = gQuery.oid;
-    }else{
-        oid = 'Smarthost_';
-    }
-    oid = oid.replace(/[^\w_-]+/gi,'').substr(0,30);
-    if(oid != 'Smarthost_'){
-        loadRemoteConfig(oid,setData);
-    }else{
-        setData();
-    }
-})();
-</script>
-<script type="text/javascript" src="http://tajs.qq.com/stats?sId=28971616" charset="UTF-8"></script>
-<script type="text/javascript" src="share.js" charset="utf-8"></script>
+<h2 class="center">Success</h2>
+<form method="GET" action="/" id="selectForm" onsubmit="return false">
+    <ul class="links">
+    	<li><a target="_blank" href="http://localhost/">localhost</a></li>
+        <span holder></span>
+    </ul>
+    <div class="">
+        <button class="blue">Go Back</button>
+    </div>
+</form>
+<script type="text/javascript" src="js/appframework.min.js" charset="utf-8"></script> 
+<script type="text/javascript" src="js/comm.js" charset="utf-8"></script> 
+<script type="text/javascript" src="js/done.js" charset="utf-8"></script> 
+<script type="text/javascript" src="http://tajs.qq.com/stats?sId=28971616" charset="utf-8"></script>
 </body>
 </html>

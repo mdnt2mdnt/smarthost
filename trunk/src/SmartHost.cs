@@ -234,7 +234,7 @@ public class SmartHost : IAutoTamper
 				try{this.usrConfig.Remove(ipHost);}catch(Exception e){}
 			}
 		}
-		if(pQuery["proxyModel"] == "remote" && pQuery["remoteHost"].Length > 0 && pQuery["remotePort"].Length>0)
+		if(pQuery["proxyModel"] == "remote" && pQuery.ContainsKey("remoteHost") && pQuery.ContainsKey("remotePort") && pQuery["remoteHost"].Length > 0 && pQuery["remotePort"].Length>0)
 		{
 			this.usrConfig[cIP+"|remoteProxy"] = pQuery["remoteHost"]+":"+pQuery["remotePort"];
 			this.printJSLog("All IP/Host pairs from "+cIP+" have been reset.\n");
@@ -264,15 +264,11 @@ public class SmartHost : IAutoTamper
     {
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
         bool ret = this.processClientConfig(postStr, cIP);
-        if (ret) {
-            oSession["x-replywithfile"] = "rdone.html";
-        } else {
-            oSession["x-replywithfile"] = "done.html";
-            if (this.usrConfig.ContainsKey(cIP + "|remoteProxy")) {
-                this.printJSLog(cIP + " remoteProxy " + this.usrConfig[cIP + "|remoteProxy"] + " removed");
-                this.usrConfig.Remove(cIP + "|remoteProxy");
-            }
-        }
+		oSession["x-replywithfile"] = "done.html";
+		if (this.usrConfig.ContainsKey(cIP + "|remoteProxy")) {
+			this.printJSLog(cIP + " remoteProxy " + this.usrConfig[cIP + "|remoteProxy"] + " removed");
+			this.usrConfig.Remove(cIP + "|remoteProxy");
+		}
     }
     [CodeDescription("Deal With Request if client IP Configed")]
     private void tamperConfigedHost(string cIP, Session oSession)
