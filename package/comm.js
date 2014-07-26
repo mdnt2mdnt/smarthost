@@ -1,11 +1,15 @@
 function setKeyValue( key, value )
 {
-
+	localStorage.setItem(key,value);
 }
 
 function delKey( key )
 {
-
+	localStorage.getItem(key);
+}
+function clearStore()
+{
+	localStorage.clear();
 }
 
 function strToMap(str, sp1, sp2)
