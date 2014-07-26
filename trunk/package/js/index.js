@@ -2,9 +2,14 @@ function loadConfig(){
 	$.ajax({
 		url:'Configs/'+gQuery.oid+'.txt?'+(''+Math.random()).substr(2,5),
 		dataType:'text',
-		method:'GET'
-	}).done(function(res){
-		console.log(res);
+		method:'GET',
+		success: function(res){
+		},
+		error:function(xhr){
+			if(xhr.status != 200){
+				console.log(xhr.status);
+			}
+		}
 	});
 }
 function CloneHost(){
