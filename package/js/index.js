@@ -1,16 +1,24 @@
 function loadConfig(){
 	$.ajax({
-		url:'Configs/'+gQuery.oid+'.txt?'+(''+Math.random()).substr(2,5),
+		url:'Configs/'+gQuery.oid+'.txt?'+(''+Math.random()).substr(-5),
 		dataType:'text',
 		method:'GET',
-		success: function(res){
-		},
-		error:function(xhr){
-			if(xhr.status != 200){
-				console.log(xhr.status);
-			}
+		success: function(xhr){
+			restoreHost(xhr);
 		}
 	});
+}
+function restoreHost(postStr){
+	var obj = strToMap(postStr);
+	if(obj.proxyModel == 'remote'){
+		$('#remoteHost').prop('name','remoteHost').val(obj.remoteHost);
+		$('#remotePort').prop('name','remotePort').val(obj.remotePort);
+	}else{
+	}
+	if(obj.proxyModel == 'local' || obj.proxyModel == 'remote'){
+		modelSEL.val(obj.proxyModel);
+		SelectModel();
+	}
 }
 function CloneHost(){
 	var div = cloneDOM.cloneNode(true);
@@ -20,12 +28,11 @@ function CloneHost(){
 }
 function checkForm(){
 	var valid = false;
-	if(modelSEL.val().trim() == 'local'){
-		valid = checkHosts();
+	if(modelSEL && modelSEL.val().trim() == 'local'){
+		return checkHosts();
 	}else{
-		valid = checkRemote();
+		return checkRemote();
 	}
-	return valid && updateUserConfig();
 }
 function UpdateFormFields(){
 	var list = $('div.info');
@@ -34,7 +41,7 @@ function UpdateFormFields(){
 			$name = $('input[key="key"]',list[i]),
 			$val  = $('input[key="val"]',list[i]);
 		if($name.val().length>0 && $val.val().length>0){
-			$hide.attr('name',$name.val().replace(/(^\s+|\s+$)/gi,''))
+			$hide.prop('name',$name.val().replace(/(^\s+|\s+$)/gi,''))
 			.val($val.val().replace(/(^s+|\s+$)/gi,''));
 		}
 	}
@@ -63,25 +70,27 @@ function checkHosts(){
 	}
 }
 function checkRemote(){
-	var $host = $('#remoteHost'),host = $host.val(), $port = $('#remotePort'),port=$port.val();
+	var $host = $('#remoteHost'),host = $host.val(), $port = $('#remotePort'),port=$port.val(),valid = true;
 	if(!/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/.test(host)){
 		$host.addClass('invalid');
-		return false;
+		valid = false;
+	}else{
+		$host.removeClass('invalid');
 	}
 	if(!/^[1-9][0-9]+$/.test(port)){
 		$port.addClass('invalid');
+		valid = false;
+	}else{
+		$port.removeClass('invalid');
+	}
+	if(valid){
+		$host.prop('name','remoteHost');
+		$port.prop('name','remotePort');
+		UpdateFormFields();
+		return true;
+	}else{
 		return false;
 	}
-	$host.attr('name','remoteHost').removeClass('invalid');
-	$port.attr('name','remotePort').removeClass('invalid');
-	UpdateFormFields();
-	return true;
-}
-function updateUserConfig(){
-	if(gQuery.oid){
-		$('#oidInput').prop('name','oid').val(gQuery.oid);
-	}
-	return true;
 }
 function SelectModel(){
 	var val = modelSEL.val().trim();

@@ -12,7 +12,7 @@
 </head>
 <body>
 <h2 class="center">SmartHost Configuration</h2>
-<form method="POST" action="/" id="selectForm" onsubmit="return checkForm()" enctype="application/x-www-form-urlencoded" >
+<form method="POST" action="/" id="selectForm" onsubmit="return checkForm();" enctype="application/x-www-form-urlencoded" >
   <fieldset>
     <legend>Model Select</legend>
     <select id="modelSelect" name="proxyModel">
@@ -27,6 +27,7 @@
   </fieldset>
   <fieldset id="localContent">
     <legend>IP/Host Pairs</legend>
+    <div class="select">LocalHost<select><option>127.0.0.1</option></select></div><i></i>
     <span holder></span>
     <div class="info">
       <input class="input" type="text" key="val"  placeholder="ip address" maxlength="15" />

@@ -28,9 +28,9 @@ function getHostRulesFromDom(){
 			ar.push((!ck.attr('checked') ? '#' : '') + ck.attr('ip') + ' ' + ck.attr('domain') + (ck.attr('cmnt') ? (' #' + ck.attr('cmnt')) : ''));
 			ar.domain = ck.attr('domain');
 		});
-		arHost.push(['#{domain=' + ar.domain, ar.join('\r\n'), "#}"].join('\r\n'));
+		arHost.push(['#{domain=' + ar.domain, ar.join("\r\n"), "#}"].join("\r\n"));
 	});
-	return arHost.join('\r\n\r\n');
+	return arHost.join("\r\n\r\n");
 }
 function getHostHtmlFromDom(){
     var arHost = [];
@@ -45,9 +45,9 @@ function getHostHtmlFromDom(){
 			ar.domain = ck.attr('domain');
 		});
         ar.unshift('<option value=""'+(noSel?' selected':'')+'>IDC Host</option>');
-        arHost.push('\t'+ar.domain+'<select name="'+ar.domain+'">\r\n\t\t'+ar.join('\r\n\t\t')+'\r\n\t</select>\r\n');
+        arHost.push('\t<div class="select">'+ar.domain+'<select name="'+ar.domain+'">'+ar.join('')+'</select></div><i></i>');
 	});
-	return arHost.join('');
+	return arHost.join("\r\n");
 }
 function getHostHtmlFromText(text){
     var arGroup = text.match(/#\{[\s\S]+?#\}/g) || [], arHtml = [], rSplit = /(\r)?\n/,htmLst = [];
@@ -58,9 +58,9 @@ function getHostHtmlFromText(text){
             rule = getObjByRule(n), // rule = { sharp:'#'||'',ip:'192....',domain:'',cmnt:'sdls'}
             ips.push('<option value="'+rule.ip+'"'+ (rule.sharp=='' ? ' selected' : '') + '>' + rule.ip + '</option>');
         });
-        htmLst.push('\t'+rule.domain+'<select name="'+rule.domain+'">\r\n\t\t'+ips.join('\r\n\t\t')+'\r\n\t</select>\r\n');
+        htmLst.push('\t<div class="select">'+rule.domain+'<select name="'+rule.domain+'">'+ips.join('')+'</select></div><i></i>');
 	});
-    return htmLst.join('');
+    return htmLst.join("\r\n");
 }
 function getHostDoneFromDom(){
 	var arHost = [];
@@ -70,9 +70,9 @@ function getHostDoneFromDom(){
 			var ck = $(n);
 			ar.domain = ck.attr('domain');
 		});
-        arHost.push('\t<a href="http://'+ar.domain+'/" target="_blank">'+ar.domain+'</a><br/>\r\n');
+        arHost.push('\t<li><a target="_blank" href="http://'+ar.domain+'/">'+ar.domain+'</a></li>');
 	});
-	return arHost.join('');
+	return arHost.join("\r\n");
 }
 function getHostDoneFromText(text){
     var arGroup = text.match(/#\{[\s\S]+?#\}/g) || [], arHtml = [], rSplit = /(\r)?\n/,htmLst = [];
@@ -81,10 +81,10 @@ function getHostDoneFromText(text){
         var rule = null,ips  = [];
         if(ar.length>1){
             rule = getObjByRule(ar[1]); // rule = { sharp:'#'||'',ip:'192....',domain:'',cmnt:'sdls'}
-            htmLst.push('\t<a href="http://'+rule.domain+'/" target="_blank">'+rule.domain+'</a><br/>\r\n');
+            htmLst.push('\t<li><a target="_blank" href="http://'+rule.domain+'/">'+rule.domain+'</a></li>');
         }
 	});
-    return htmLst.join('');
+    return htmLst.join("\r\n");
 }
 function setTextToHost(text){
     if (text.empty()) return false;
@@ -110,17 +110,15 @@ function saveDomToHost(message, isSilence){
 	isSilence || msg(message);
 }
 function saveDomToDone(htmTxt,hreTxt){
-	htmTxt = htmTxt.replace(/^.*<a href=".*[\r\n]+/gmi,'')
-    htmTxt = htmTxt.replace(/(\r\n){2,}/gmi,'\r\n');
-    htmTxt = htmTxt.replace('<span holder></span>',hreTxt+'\r\n\t<span holder></span>');
+	htmTxt = htmTxt.replace(/^\s*<li><a target="_blank" href="[^\r\n]+<\/a><\/li>/gmi,'')
+    htmTxt = htmTxt.replace(/[\r\n]{2,}/gi,"\r\n");
+    htmTxt = htmTxt.replace('<span holder></span>',hreTxt+"\r\n\t<span holder></span>");
     setDoneText(htmTxt);
 }
 function saveDomToHtml(htmTxt,frmTxt){
-    htmTxt = htmTxt.replace(/^.*<select name=.*[\r\n]+/gmi,'')
-    htmTxt = htmTxt.replace(/^.*<option value=.*[\r\n]+/gmi,'');
-    htmTxt = htmTxt.replace(/^.*<\/select>.*[\r\n]+/gmi,'');
-    htmTxt = htmTxt.replace(/(\r\n){2,}/gmi,'\r\n');
-    htmTxt = htmTxt.replace('<span holder></span>',frmTxt+'\r\n\t<span holder></span>');
+    htmTxt = htmTxt.replace(/^[\s\t]+<div class=\"select\">[^\r\n]+<\/select><\/div><i><\/i>/gmi,'');
+    htmTxt = htmTxt.replace(/[\r\n]{2,}/gi,"\r\n");
+    htmTxt = htmTxt.replace('<span holder></span>',frmTxt+"\r\n\t<span holder></span>");
     setFormText(htmTxt);
 }
 function msg(text){
@@ -195,7 +193,7 @@ function formatHostFile(){
 		arHText.push('#}\r\n');
 	});
 
-	var fmtTxt = arHText.join('\r\n');
+	var fmtTxt = arHText.join("\r\n");
 	if (!setHostText(fmtTxt)) {
 		msg('save formated host failed，host maybe readonly! init error！');
 		return '';
@@ -337,7 +335,7 @@ function initGlobleVar(){
 		key = "HKEY_CURRENT_USER\\Software\\SmartHost\\",
 		sysroot = Sh.RegRead(key+"InstallPath");
 	window.hostpath = sysroot + "\\Scripts\\Smarthost\\hosts";
-    window.formpath = sysroot + "\\Captures\\Responses\\form.html"
+    window.formpath = sysroot + "\\Captures\\Responses\\index.html"
     window.donepath = sysroot + "\\Captures\\Responses\\done.html"
 	if (!hostpath) {
 		msg('init error, can not find hosts file！');

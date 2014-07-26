@@ -36,7 +36,11 @@ button.green{
 
 dl{text-align:justify;margin:0px;padding:0px;}
 dd{margin-left:1em;}
-.info{ border-bottom:1px dotted #ccc; padding-bottom:0.3em;margin-bottom:0.5em;}
-.copy{margin-bottom:5em;font-size:0.8em;color:#666;}
+div.info,div.select{padding:0.3em;margin-bottom:0.5em;}
+div.select{font-weight:600;}
+
+
+
+.copy{margin-bottom:1em;font-size:0.8em;color:#666;}
 #localContent div:last-child{border-bottom:none;margin-bottom:1em;}
 #localContent{display:none;}
