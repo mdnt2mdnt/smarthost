@@ -108,6 +108,9 @@ Section Uninstall
     Delete        "$OUTDIR\Captures\Responses\js\appframework.min.js"
     Delete        "$OUTDIR\Captures\Responses\js\comm.js"
     Delete        "$OUTDIR\Captures\Responses\js\index.js"
+    Delete        "$OUTDIR\Captures\Responses\js\rdone.js"
+    Delete        "$OUTDIR\Captures\Responses\js\done.js"
+    Delete        "$OUTDIR\Captures\Responses\mstyle.css"
     Delete        "$OUTDIR\Captures\Responses\remote.html"
     Delete        "$OUTDIR\Captures\Responses\favicon.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\smarthost.ico"
@@ -122,4 +125,5 @@ Section Uninstall
     RMDir         "$OUTDIR\Scripts\Smarthost"
     RMDir         "$OUTDIR\Captures\Responses\Configs"
     RMDir         "$OUTDIR\Captures\Responses\Packages"
+    RMDir         "$OUTDIR\Captures\Responses\js"
 SectionEnd
