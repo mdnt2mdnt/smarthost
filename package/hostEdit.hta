@@ -70,7 +70,7 @@ function getHostDoneFromDom(){
 			var ck = $(n);
 			ar.domain = ck.attr('domain');
 		});
-        arHost.push('\t<li><a target="_blank" href="http://'+ar.domain+'/">'+ar.domain+'</a></li>');
+        arHost.push('\t<li><a target="_blank" href="http://'+ar.domain+'/">'+ar.domain + ' ['+ ck.attr('ip') + ']</a></li>');
 	});
 	return arHost.join("\r\n");
 }
@@ -81,7 +81,7 @@ function getHostDoneFromText(text){
         var rule = null,ips  = [];
         if(ar.length>1){
             rule = getObjByRule(ar[1]); // rule = { sharp:'#'||'',ip:'192....',domain:'',cmnt:'sdls'}
-            htmLst.push('\t<li><a target="_blank" href="http://'+rule.domain+'/">'+rule.domain+'</a></li>');
+            htmLst.push('\t<li><a target="_blank" href="http://'+rule.domain+'/">'+rule.domain++ ' ['+ rule.ip + ']</a></li>');
         }
 	});
     return htmLst.join("\r\n");
