@@ -20,7 +20,7 @@ using Fiddler;
 [assembly: AssemblyTitle("SmartHost")]
 [assembly: AssemblyDescription("A Romote IP/Host REMAP Add-on for Fiddler")]
 [assembly: AssemblyCompany("Tencent .Ltd")]
-[assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2013")]
+[assembly: AssemblyCopyright("Copyright Mooringniu@Tencent 2014")]
 [assembly: AssemblyProduct("SmartHost")]
 [assembly: AssemblyTrademark("SmartHost")]
 [assembly: AssemblyVersion("1.1.0.3")]
