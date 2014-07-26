@@ -34,9 +34,7 @@ button.green{
 .float{position:fixed;bottom:0.5em;width:100%;}
 .float button{margin-left:auto;margin-right:auto;;width:90%;}
 
-dd{text-indent:-1em;text-align:justify;}
-.model_tips{border:1px dotted #ccc;border-radius:3px;padding:0.3em;}
-
+dl{text-align:justify;margin:0px;padding:0px;}
 .info{ border-bottom:1px dotted #ccc; padding-bottom:0.3em;margin-bottom:0.5em;}
 .copy{margin-bottom:5em;font-size:0.8em;color:#666;}
 #localContent div:last-child{border-bottom:none;margin-bottom:1em;}

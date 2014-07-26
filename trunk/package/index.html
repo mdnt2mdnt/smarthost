@@ -14,7 +14,7 @@
 <h2 class="center">SmartHost Configuration</h2>
 <form method="POST" action="http://smarthost.duapp.com/" id="selectForm" onsubmit="return checkForm()" enctype="application/x-www-form-urlencoded" >
   <fieldset>
-    <label for="modelSelect">Model Select</label>
+    <legend>Model Select</legend>
     <select id="modelSelect" name="proxyModel">
       <option value="remote">Romote Proxy</option>
       <option value="local">Local IP/Host Pairs</option>
@@ -40,12 +40,15 @@
   	<button type="submit" class="blue">Submit</button>
   </div>
 </form>
-<dl class="model_tips">
-  <dt>Romote Proxy</dt>
-  <dd>proxy all HTTP requests to specify ip:port</dd>
-  <dt>Local IP/Host Pairs</dt>
-  <dd>select ip/host pairs which have been configurated by proxy admin</dd>
-</dl>
+<fieldset>
+<legend>Model Tips</legend>
+    <dl>
+      <dt>Romote Proxy</dt>
+      <dd>proxy all HTTP requests to specify ip:port</dd>
+      <dt>Local IP/Host Pairs</dt>
+      <dd>select ip/host pairs which have been configurated by proxy admin</dd>
+    </dl>
+</fieldset>
 <div class="center copy">&copy; by mooringniu</div>
 <script type="text/javascript" src="appframework.min.js" charset="utf-8"></script> 
 <script type="text/javascript" src="comm.js" charset="utf-8"></script> 
