@@ -64,7 +64,7 @@ Section SmartHost
     File             "/oname=$OUTDIR\Captures\Responses\rdone.html"     ..\package\rdone.html
     File             "/oname=$OUTDIR\Captures\Responses\blank.gif"      ..\package\blank.gif
     File             "/oname=$OUTDIR\Captures\Responses\mstyle.css"     ..\package\mstyle.css
-    File			 "/oname=$OUTDIE\Captures\Responses\js\appframework.min.js" ..\package\appframework.min.js
+    File			 "/oname=$OUTDIR\Captures\Responses\js\appframework.min.js" ..\package\appframework.min.js
     File			 "/oname=$OUTDIR\Captures\Responses\js\comm.js"		..\package\comm.js
     File			 "/oname=$OUTDIR\Captures\Responses\js\index.js"	..\package\index.js
     File			 "/oname=$OUTDIR\Captures\Responses\js\done.js"		..\package\done.js
