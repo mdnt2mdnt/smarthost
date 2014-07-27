@@ -27,17 +27,17 @@
   </fieldset>
   <fieldset id="localContent">
     <legend>IP/Host Pairs</legend>
-    <div class="select">LocalHost<select><option>127.0.0.1</option></select></div><i></i>
+    <div class="select">LocalHost<select name="localhost"><option value="">IDC Host</option><option value="127.0.0.1">127.0.0.1</option></select></div><i></i>
     <span holder></span>
     <div class="info">
       <input class="input" type="text" key="val"  placeholder="ip address" maxlength="15" />
       <input class="input" type="text" key="key" placeholder="host www.qq.com" />
-      <input class="input" type="hidden" name=""/>
+      <input class="input" type="hidden"/>
     </div>
     <button id="addBtnOne" class="green">Add Pairs</button>
   </fieldset>
   <div class="">
-  	<input type="hidden" id="oidInput"/>
+  	<input type="hidden" id="oid"/>
   	<button type="submit" class="blue">Submit</button>
   </div>
 </form>

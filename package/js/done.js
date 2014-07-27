@@ -3,13 +3,13 @@ function loadConfig(){
 		url:'Configs/'+gQuery.oid+'.txt?'+(''+Math.random()).substr(-5),
 		dataType:'text',
 		method:'GET',
-		success: function(xhr){
-			restoreHost(xhr.responseText);
+		success: function(res){
+			restoreHost(res)
 		}
 	});
 }
 function restoreHost(postStr){
-	console.log(postStr);
+	var obj = strToMap(postStr);
 }
 
 function backToConfig(){
