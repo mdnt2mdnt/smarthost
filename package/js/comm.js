@@ -1,17 +1,35 @@
-function setKeyValue( key, value )
+function setKey( key, value )
 {
-	localStorage.setItem(key,value);
+	try{localStorage.setItem(key,value);}catch(e){}
+}
+function getKey(key){
+	try{
+		return localStorage.getItem(key);
+	}catch(e){
+		return null;
+	}
 }
 
 function delKey( key )
 {
-	localStorage.getItem(key);
+	try{
+		localStorage.removeItem(key);
+	}catch(e){}
 }
 function clearStore()
 {
-	localStorage.clear();
+	try{
+		localStorage.clear();
+	}catch(e){}
 }
-
+function restoreRemoteConfig(restoreHost){
+	var model = getKey('proxyModel');
+	if(model=='local'||model=='remote'||model==''||model==null){
+		var host=getKey('remoteHost')||'',
+			port=getKey('remotePort')||'';
+		restoreHost('proxyModel='+(model||'')+'&remoteHost='+host+'&remotePort='+port);
+	}
+}
 function strToMap(str, sp1, sp2)
 {
 	var arr = str.split(sp1||'&'),
@@ -19,7 +37,8 @@ function strToMap(str, sp1, sp2)
 	for(var i=0,il=arr.length;i<il;i++){
 		var tmp = arr[i].split(sp2||'=');
 		if(tmp.length==2&&tmp[0].length){
-			obj[tmp[0].replace(/[^a-z0-9]+/gi,'')] = tmp[1];
+			try{ tmp[1] = decodeURIComponent(tmp[1]); }catch(e){}
+			obj[tmp[0].replace(/\s+/gi,'')] = tmp[1];
 		}
 	}
 	return obj;
