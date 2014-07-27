@@ -52,39 +52,38 @@ Section SmartHost
     nt0:
     StrCpy           $R1 "$0"
     StrCpy           $R2 "$OUTDIR"
-    
+
     SetOutPath       "$DOCUMENTS\Fiddler2\"
     CreateDirectory  $OUTDIR\Captures\Responses
     CreateDirectory  $OUTDIR\Captures\Responses\js
     CreateDirectory  $OUTDIR\Scripts\Smarthost
-    File             "/oname=$OUTDIR\Scripts\Smarthost.dll"             ..\obj\Smarthost.dll
-    File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"      ..\package\readme.txt
-    File             "/oname=$OUTDIR\Captures\Responses\index.html"      ..\package\index.html
-    File             "/oname=$OUTDIR\Captures\Responses\help.txt"       ..\package\help.txt
-    File             "/oname=$OUTDIR\Captures\Responses\done.html"      ..\package\done.html
-    File             "/oname=$OUTDIR\Captures\Responses\rdone.html"     ..\package\rdone.html
-    File             "/oname=$OUTDIR\Captures\Responses\blank.gif"      ..\package\blank.gif
-    File             "/oname=$OUTDIR\Captures\Responses\mstyle.css"     ..\package\mstyle.css
-    File			 "/oname=$OUTDIR\Captures\Responses\js\appframework.min.js" ..\package\js\appframework.min.js
-    File			 "/oname=$OUTDIR\Captures\Responses\js\comm.js"		..\package\js\comm.js
-    File			 "/oname=$OUTDIR\Captures\Responses\js\index.js"	..\package\js\index.js
-    File			 "/oname=$OUTDIR\Captures\Responses\js\done.js"		..\package\js\done.js
-    File			 "/oname=$OUTDIR\Captures\Responses\js\rdone.js"	..\package\js\rdone.js
-    File             "/oname=$OUTDIR\Captures\Responses\favicon.ico"    ..\package\favicon.ico
-    File             "/oname=$OUTDIR\Scripts\Smarthost\smarthost.ico"   ..\package\favicon.ico
-    File             "/oname=$OUTDIR\Scripts\Smarthost\hostEditor.hta"  ..\package\hostEdit.hta
-    File             "/oname=$OUTDIR\Scripts\Smarthost\extend.js"       ..\package\extend.js
-    File             "/oname=$OUTDIR\Scripts\Smarthost\jquery.js"       ..\package\jquery.js
-    File             "/oname=$OUTDIR\Scripts\Smarthost\style.css"       ..\package\style.css
+
+    File             "/oname=$OUTDIR\Scripts\Smarthost.dll"                      ..\obj\Smarthost.dll
+    File             "/oname=$OUTDIR\Scripts\Smarthost\README.txt"               ..\package\readme.txt
+    File             "/oname=$OUTDIR\Captures\Responses\index.html"              ..\package\index.html
+    File             "/oname=$OUTDIR\Captures\Responses\remote.html"             ..\package\index.html
+    File             "/oname=$OUTDIR\Captures\Responses\help.txt"                ..\package\help.txt
+    File             "/oname=$OUTDIR\Captures\Responses\done.html"               ..\package\done.html
+    File             "/oname=$OUTDIR\Captures\Responses\blank.gif"               ..\package\blank.gif
+    File             "/oname=$OUTDIR\Captures\Responses\mstyle.css"              ..\package\mstyle.css
+    File             "/oname=$OUTDIR\Captures\Responses\js\appframework.min.js"  ..\package\js\appframework.min.js
+    File             "/oname=$OUTDIR\Captures\Responses\js\comm.js"              ..\package\js\comm.js
+    File             "/oname=$OUTDIR\Captures\Responses\js\index.js"             ..\package\js\index.js
+    File             "/oname=$OUTDIR\Captures\Responses\js\done.js"              ..\package\js\done.js
+    File             "/oname=$OUTDIR\Captures\Responses\favicon.ico"             ..\package\favicon.ico
+    File             "/oname=$OUTDIR\Scripts\Smarthost\smarthost.ico"            ..\package\favicon.ico
+    File             "/oname=$OUTDIR\Scripts\Smarthost\hostEditor.hta"           ..\package\hostEdit.hta
+    File             "/oname=$OUTDIR\Scripts\Smarthost\extend.js"                ..\package\extend.js
+    File             "/oname=$OUTDIR\Scripts\Smarthost\jquery.js"                ..\package\jquery.js
+    File             "/oname=$OUTDIR\Scripts\Smarthost\style.css"                ..\package\style.css
     CreateDirectory  "$OUTDIR\Captures\Responses\Configs"
-    CreateDirectory  "$OUTDIR\Captures\Responses\Packages"
     WriteUninstaller "$OUTDIR\Scripts\Smarthost\Uninstall.exe"
     WriteRegStr HKCU "Software\SmartHost" "HostPath" "$OUTDIR"
     WriteRegStr HKCU "Software\SmartHost" "InstallPath" "$OUTDIR"
     Delete           "$OUTDIR\Scripts\CustomRules.js"
     IfFileExists     "$OUTDIR\Scripts\Smarthost\hosts" fex fnex
     fnex:
-        File         "/oname=$OUTDIR\Scripts\Smarthost\hosts"           ..\package\hosts
+        File         "/oname=$OUTDIR\Scripts\Smarthost\hosts"                    ..\package\hosts
     fex:
 SectionEnd
 
@@ -97,22 +96,22 @@ SectionEnd
 Section Uninstall
     SetOutPath    "$DOCUMENTS\Fiddler2\"
     Delete        "$Desktop\Config.lnk"
+    Delete        "$OUTDIR\Captures\Responses\favicon.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\README.txt"
-    Delete        "$OUTDIR\Captures\Responses\blank.gif"
-    Delete        "$OUTDIR\Captures\Responses\form.html"
-    Delete        "$OUTDIR\Captures\Responses\index.html"    
     Delete        "$OUTDIR\Captures\Responses\help.txt"
+    Delete        "$OUTDIR\Captures\Responses\blank.gif"
+    Delete        "$OUTDIR\Captures\Responses\remote.html"
+    Delete        "$OUTDIR\Captures\Responses\form.html"
+    Delete        "$OUTDIR\Captures\Responses\index.html"
     Delete        "$OUTDIR\Captures\Responses\done.html"
     Delete        "$OUTDIR\Captures\Responses\rdone.html"
+    Delete        "$OUTDIR\Captures\Responses\mstyle.css"
     Delete        "$OUTDIR\Captures\Responses\share.js"
     Delete        "$OUTDIR\Captures\Responses\js\appframework.min.js"
     Delete        "$OUTDIR\Captures\Responses\js\comm.js"
     Delete        "$OUTDIR\Captures\Responses\js\index.js"
     Delete        "$OUTDIR\Captures\Responses\js\rdone.js"
     Delete        "$OUTDIR\Captures\Responses\js\done.js"
-    Delete        "$OUTDIR\Captures\Responses\mstyle.css"
-    Delete        "$OUTDIR\Captures\Responses\remote.html"
-    Delete        "$OUTDIR\Captures\Responses\favicon.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\smarthost.ico"
     Delete        "$OUTDIR\Scripts\Smarthost\hosts"
     Delete        "$OUTDIR\Scripts\Smarthost\hostEditor.hta"

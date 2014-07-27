@@ -1,7 +1,7 @@
 /*
  * Copyright by mooringniu@gmail.com ,Any Suggestion Contact me by email
  * Author : mooring
- * Date   : 12/04/2013
+ * Date   : 07/27/2014
  */
 using System;
 using System.Collections;
@@ -146,7 +146,7 @@ public class SmartHost : IAutoTamper
     [CodeDescription("print jslog to fiddler for mobile debuging")]
     private void printJSLog(string log)
     {
-        FiddlerApplication.Log.LogFormat("SmartHost Log: {0}\n",new object[1]{(object) log});
+        FiddlerApplication.Log.LogFormat("SmartHost Log: {0}",new object[1]{(object) log});
     }
     [CodeDescription("set WireLess & LanIP for future Use")]
     private void getAdapterAddress()
@@ -174,7 +174,7 @@ public class SmartHost : IAutoTamper
             }
         }
         if(this._wifiIP.Length>0 || this._lanIP.Length>0){
-            this.printJSLog("IP Address \t"+(this._wifiIP.Length>0?" WIFI:"+this._wifiIP:"")+(this._lanIP.Length>0?"\tEthernet:"+this._lanIP:""));
+            this.printJSLog("IP Address "+(this._wifiIP.Length>0?" WIFI:"+this._wifiIP:"")+(this._lanIP.Length>0?"  Ethernet:"+this._lanIP:""));
         }
     }
     [CodeDescription("send IP Config for other programs")]
@@ -221,7 +221,7 @@ public class SmartHost : IAutoTamper
         }
     }
     [CodeDescription("parse client post message")]
-    private bool processClientConfig(string postStr, string cIP)
+    private void processClientConfig(string postStr, string cIP)
     {
         Dictionary<string, string> pQuery = this.splitString(postStr, new char[] { '&' }, new char[] { '=' });
         if(pQuery.ContainsKey("oid")){
@@ -234,21 +234,31 @@ public class SmartHost : IAutoTamper
 				try{this.usrConfig.Remove(ipHost);}catch(Exception e){}
 			}
 		}
-		if(pQuery["proxyModel"] == "remote" && pQuery.ContainsKey("remoteHost") && pQuery.ContainsKey("remotePort") && pQuery["remoteHost"].Length > 0 && pQuery["remotePort"].Length>0)
+		if(pQuery["proxyModel"]=="")
+		{
+			this.printJSLog(cIP+"'s configuration has been cleaned.");
+			return;	
+		}
+		if(pQuery.ContainsKey("proxyModel") && pQuery["proxyModel"]=="remote"
+			&&pQuery.ContainsKey("remoteHost")&&pQuery["remoteHost"].Length>0
+			&&pQuery.ContainsKey("remotePort")&&pQuery["remotePort"].Length>0 )
 		{
 			this.usrConfig[cIP+"|remoteProxy"] = pQuery["remoteHost"]+":"+pQuery["remotePort"];
-			this.printJSLog("All IP/Host pairs from "+cIP+" have been reset.\n");
-			this.printJSLog("All HTTP Requests from "+cIP+" will be sent to To: "+pQuery["remoteHost"]+":"+pQuery["remotePort"]+".\n");
-			return true;
+			this.printJSLog(cIP + "'s proxy Model switch to [Remote Proxy] " );
+			this.printJSLog("All IP/Host pairs configuration for "+cIP+" have been removed.");
+			this.printJSLog("All HTTP requests from "+cIP+" will be sent to : "+pQuery["remoteHost"]+":"+pQuery["remotePort"]+".");
 		}
 		else
 		{
+			string proxyStr = this.usrConfig.ContainsKey(cIP+"|remoteProxy") ? this.usrConfig[cIP+"|remoteProxy"] : "";
+			this.printJSLog(cIP + "'s proxy Model switch to [IP/Host Pairs] ");
+			this.printJSLog("Remote Proxy "+proxyStr+" has been removed.");
 			foreach (string key in pQuery.Keys) {
-				if(key!="oid" && key!="proxyModel" && pQuery[key].Length > 0) {
+				if(key!="oid" && key!="proxyModel"&&key!="remoteHost"&&key!="remotePort"&&pQuery[key].Length > 0) {
 					this.usrConfig[cIP + "|" + key] = pQuery[key];
+					this.printJSLog( key + " ===> " + pQuery[key] ); 
 				}
 			}
-			return false;
 		}   
     }
     [CodeDescription("save client Config To File")]
@@ -263,12 +273,8 @@ public class SmartHost : IAutoTamper
     private void updateClientConfig(string cIP, Session oSession)
     {
         string postStr = Encoding.UTF8.GetString(oSession.RequestBody);
-        bool ret = this.processClientConfig(postStr, cIP);
+        this.processClientConfig(postStr, cIP);
 		oSession["x-replywithfile"] = "done.html";
-		if (this.usrConfig.ContainsKey(cIP + "|remoteProxy")) {
-			this.printJSLog(cIP + " remoteProxy " + this.usrConfig[cIP + "|remoteProxy"] + " removed");
-			this.usrConfig.Remove(cIP + "|remoteProxy");
-		}
     }
     [CodeDescription("Deal With Request if client IP Configed")]
     private void tamperConfigedHost(string cIP, Session oSession)
