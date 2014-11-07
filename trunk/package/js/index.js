@@ -7,7 +7,7 @@ function loadConfig(){
 	});
 }
 function restoreHost(postStr){
-	var obj = strToMap(postStr), j=0;
+	var obj = strToMap(postStr),j=0;
 	$('#remoteHost').prop('name','remoteHost').val(obj.remoteHost);
 	$('#remotePort').prop('name','remotePort').val(obj.remotePort);
 	if(obj.proxyModel == 'local' || obj.proxyModel == 'remote'){

@@ -9,7 +9,6 @@ function getKey(key){
 		return null;
 	}
 }
-
 function delKey( key )
 {
 	try{
