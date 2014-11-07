@@ -33,8 +33,11 @@ function restoreHost(postStr){
 }
 function CloneHost(key,val){
 	var div = cloneDOM.cloneNode(true);
-	cloneBTN.parentNode.insertBefore(div,cloneBTN);
+	cloneBTN.parentNode.parentNode.appendChild(div);
 	$('input',div).removeClass('invalid').val('')[0].focus();
+	$('button',div).html('Del Pair').removeAttr('id').attr('class','delBtn dark').click(function(){
+		$(this).parent().remove();
+	});
 	if(key){
 		$('input[key="key"]',div).val(key);
 		$('input[key="val"]',div).val(val||'');
