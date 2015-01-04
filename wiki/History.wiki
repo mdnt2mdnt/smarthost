@@ -17,3 +17,5 @@
     # Fix HTTP GET 502 error after post Config
   * 1.1.0.3
     # Error Fixed on HTTPS Remote Model
+  * 1.1.0.4
+    # moved to github for GFW
