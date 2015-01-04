@@ -7,11 +7,11 @@ function loadConfig(){
 	});
 }
 function restoreHost(postStr){
-	var obj = strToMap(postStr),j=0;
+	var obj = strToMap(postStr), j=0;
 	$('#remoteHost').prop('name','remoteHost').val(obj.remoteHost);
 	$('#remotePort').prop('name','remotePort').val(obj.remotePort);
 	if(obj.proxyModel == 'local' || obj.proxyModel == 'remote'){
-		modelSEL.val(obj.proxyModel);
+		$('#proxyModel').val(obj.proxyModel);
 		for(var i in ['oid','remoteHost','remotePort','proxyModel']){
 			if(i in obj){ delete obj[i]; }
 		}
@@ -45,29 +45,38 @@ function CloneHost(key,val){
 	return false;
 }
 function checkForm(){
-	var model = modelSEL.val().trim();
+	if(navigate.userAgent.indexOf('MQQBrowser')!=-1){
+		alert("QQ Mobile Browser is Not working!!!");
+		return;
+	}
+	var model = $('#proxyModel').val().trim();
 	if( model == 'local'){
 		setKey('proxyModel','local');
-		return checkHosts();
+		checkHosts();
 	}else if(model =='remote'){
 		setKey('proxyModel','remote');
-		return checkRemote();
+		checkRemote();
 	}else{
 		setKey('proxyModel','');
-		return true;
+		$('#selectForm')[0].submit();
 	}
 }
 function UpdateFormFields(){
-	var list = $('div.info');
+	var list = $('div.info'),formData = [];
 	for(var i=0,il=list.length;i<il;i++){
 		var $hide = $('input[type="hidden"]',list[i]),
 			$name = $('input[key="key"]',list[i]),
-			$val  = $('input[key="val"]',list[i]);
-		if($name.val().length>0){
-			$hide.prop('name',$name.val().replace(/[<>\"\']+/gi,''))
-			.val($val.val().replace(/[^\d\.]+/gi,''));
+			$val  = $('input[key="val"]',list[i]),
+			name = $name.val().replace(/[<>\"\']+/gi,''),
+			val = $val.val().replace(/[^\d\.]+/gi,'');
+		if(name.length>0){
+			$hide.prop('name',name);
+			$hide[0].setAttribute('name',name);
+			$hide.val(val);
+			formData.push(name+'='+val);
 		}
 	}
+	return formData.join('&');
 }
 function checkHosts(){
 	UpdateFormFields();
@@ -92,15 +101,17 @@ function checkHosts(){
 			validNum++;
 		}
 	}
-	if(selects.length>0 || validNum>0){
-		checkRemote();
-		return true;
+	if(validNum>0 || selects.length>0){
+		$('#remoteContent').remove();
+		$('#selectForm')[0].submit();
 	}
 	return false;
 }
 function checkRemote(){
-	var $host = $('#remoteHost'),host = $host.val(), 
-		$port = $('#remotePort'),port=$port.val(),
+	var $host = $('#remoteHost'),
+		host = $host.val(), 
+		$port = $('#remotePort'),
+		port=$port.val(),
 		valid = true;
 	if(!/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/.test(host)){
 		$host.addClass('invalid');
@@ -120,13 +131,12 @@ function checkRemote(){
 		}
 		setKey('remoteHost',host);setKey('remotePort',port);
 		UpdateFormFields();
-		return true;
-	}else{
-		return false;
+		$('#localContent').remove();
+		$('#selectForm')[0].submit();
 	}
 }
 function SelectModel(){
-	var model = modelSEL.val().trim();
+	var model = $('#proxyModel').val().trim();
 	if(model =='local' || model == 'remote'){
 		$('#'+model+'Content').show();
 		$('#'+(model=='local'?'remote':'local')+'Content,#cleanContent').hide();
@@ -135,12 +145,12 @@ function SelectModel(){
 		$('#cleanContent').show();
 	}
 }
+
 function initEvents(){
 	window.cloneDOM = $('div.info')[0];
 	window.cloneBTN = $('#addBtnOne')[0];
-	window.modelSEL = $('#proxyModel');
 	cloneBTN.onclick= function(){CloneHost();return false;};
-	modelSEL.change(SelectModel);
+	$('#proxyModel').change(SelectModel);
 }
 $(document).ready(function(){
 	initEvents();
