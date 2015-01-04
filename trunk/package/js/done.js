@@ -31,9 +31,11 @@ function restoreHost(postStr){
 		$('#remoteContent').html('Unknown Error founds, Please try again').show();
 	}
 }
+
 function backToConfig(){
 	location.replace(location.protocol+'//'+document.domain);
 }
+
 function initEvents(){
 	window.backBTN = $('button.blue')[0];
 	backBTN.onclick = backToConfig;
